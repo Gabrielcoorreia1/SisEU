@@ -1,0 +1,182 @@
+.header {
+  position: fixed;
+  top: 0;        
+  width: 100%;    
+  z-index: 1000;
+  height: var(--height-xl);
+  background: var(--theme-header-bg);
+  color: var(--theme-text); 
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--padding-2xs);
+  min-width: 400px;
+  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+.left {
+  width: 50%; 
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-right: var(--padding-m); 
+}
+.right {
+  width: 50%;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.logo {
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-right: var(--margin-s);
+}
+
+.titleMinifyed {
+  display: none;
+}
+
+.logo img,
+.title img {
+  display: block;
+  width: auto;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  font-size: var(--font-size-m);
+  font-weight: bold;
+  justify-content: space-between;
+  gap: var(--gap-xs);
+}
+
+.title .firstWord {
+  color: var(--theme-text); 
+}
+
+.title .secondWord {
+  color: var(--primary-brand); 
+}
+
+.header .icon:hover {
+  cursor: pointer;
+}
+
+.icon {
+    color: var(--theme-text); 
+    transition: color 0.3s ease;
+}
+
+.navBar {
+  display: flex;
+  gap: var(--gap-s);
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+.navBar a {
+  position: relative;
+  font-size: var(--font-size-m);
+  color: var(--theme-text);
+  margin: 0;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.navBar a::before {
+  content: "";
+  position: absolute;
+  width: 0%;
+  top: 100%;
+  height: 2px;
+  background: var(--primary-brand); 
+  transition: 0.3s;
+}
+
+.navBar a.activeLeft::before {
+  left: 0;
+  right: auto;
+}
+
+.navBar a.activeRight::before {
+  left: auto;
+  right: 0;
+}
+
+.navBar a.active::before {
+  animation: leftToRight 0.3s ease forwards;
+}
+
+.navBar a.removing::before {
+  animation: rightToLeft 0.3s ease forwards;
+}
+
+.navBar a.removingFromRight::before {
+  left: auto;
+  right: 0;
+}
+
+.navBar a.removingFromLeft::before {
+  left: 0;
+  right: auto;
+}
+
+.btn-menu {
+  cursor: pointer;
+}
+
+.header-icon-group {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-s);
+}
+
+@media (max-width: 768px) {
+  .btn-menu {
+    display: block;
+  }
+  
+  .left {
+    width: auto;
+    justify-content: flex-end;
+  }
+
+  .navBar {
+    display: none;
+  }
+  
+  .title {
+    display: none;
+  }
+
+  .titleMinifyed {
+    display: block;
+  }
+
+  .right {
+    width: auto;
+  }
+}
+
+@keyframes rightToLeft {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+@keyframes leftToRight {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}

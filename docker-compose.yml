@@ -1,0 +1,58 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: siseus-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: siseus
+      MYSQL_USER: Faca
+      MYSQL_PASSWORD: Gol050219581
+    ports:
+      - "3307:3306" 
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - siseus-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  api:
+    container_name: siseus-api
+    build:
+      context: ./back
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+  
+      - ConnectionStrings__DefaultConnection=server=mysql;port=3306;database=siseus;user=Faca;password=Gol050219581
+      - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_ENVIRONMENT=Development
+    networks:
+      - siseus-net
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+
+  frontend:
+    container_name: siseus-web
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "80:80" 
+    networks:
+      - siseus-net
+    depends_on:
+      - api
+
+networks:
+  siseus-net:
+    driver: bridge
+
+volumes:
+  mysql_data:

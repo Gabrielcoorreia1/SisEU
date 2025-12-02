@@ -1,0 +1,19 @@
+.confirmar-localizacao-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+  margin: 30px;
+}
+
+.mapa-container {
+  width: min(80vw, 300px);     
+  height: min(80vw, 300px);
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 0 10px #ccc;
+}
+
+.leaflet-control-zoom {
+  display: none !important;
+}

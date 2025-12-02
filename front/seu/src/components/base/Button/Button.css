@@ -1,0 +1,42 @@
+.botao {
+  border-radius: 16px;
+  font-size: var(--font-size-m);
+  padding: var(--padding-m) var(--padding-m);
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.divBotao {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.com-sombra {
+  box-shadow: 8px 8px 8px rgba(0, 0, 0, 0.3);
+}
+
+@media screen and (max-height: 1920px) and (min-height: 1001px) {
+  .botao {
+    margin: var(--margin-2xs) 0 0 0;
+    padding: var(--padding-xs) var(--padding-2xs);
+  }
+}
+
+@media screen and (max-height: 1000px) and (min-height: 750px) {
+  .botao {
+    margin: var(--margin-2xs) 0 0 0;
+    padding: var(--padding-xs) var(--padding-2xs);
+    font-size: var(--font-size-b);
+  }
+}
+
+@media screen and (max-height: 1000px) and (min-height: 0) {
+  .botao {
+    margin: var(--margin-2xs) 0 0 0;
+    padding: var(--padding-2xs);
+    font-size: var(--font-size-b);
+  }
+}

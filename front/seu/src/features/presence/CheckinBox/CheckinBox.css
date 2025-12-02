@@ -1,0 +1,32 @@
+.checkin-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: white;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  gap: 20px;
+}
+
+.checkin-text {
+  color: #000;
+  font-weight: 600;
+  font-size: 16px;
+  margin: 0;
+}
+
+.checkin-button {
+  background-color: #0a0080;
+  color: white;
+  font-weight: 600;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.checkin-button:hover {
+  background-color: #1a1a99;
+}
