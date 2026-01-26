@@ -10,9 +10,6 @@ namespace SisEUs.API.Controllers
     [AuthenticatedUser]
     public class AvaliacoesController(IAvaliacaoServico servico) : BaseController
     {
-        /// <summary>
-        /// Inicia uma nova avaliação para uma apresentação (Estado: EmAvaliacao)
-        /// </summary>
         [HttpPost("iniciar")]
         [ProducesResponseType(typeof(AvaliacaoResposta), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -35,9 +32,6 @@ namespace SisEUs.API.Controllers
             return HandleResult(resultado);
         }
 
-        /// <summary>
-        /// Envia a avaliação com nota (0-10) e parecer. Após o envio, a avaliação é bloqueada para edição.
-        /// </summary>
         [HttpPost("{id:int}/enviar")]
         [ProducesResponseType(typeof(AvaliacaoResposta), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -52,9 +46,6 @@ namespace SisEUs.API.Controllers
             return HandleResult(resultado);
         }
 
-        /// <summary>
-        /// Obtém uma avaliação pelo ID
-        /// </summary>
         [HttpGet("{id:int}")]
         [ProducesResponseType(typeof(AvaliacaoResposta), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -65,9 +56,6 @@ namespace SisEUs.API.Controllers
             return HandleResult(resultado);
         }
 
-        /// <summary>
-        /// Lista todas as avaliações de uma apresentação
-        /// </summary>
         [HttpGet("apresentacao/{apresentacaoId:int}")]
         [ProducesResponseType(typeof(IEnumerable<AvaliacaoResposta>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -78,9 +66,6 @@ namespace SisEUs.API.Controllers
             return HandleResult(resultado);
         }
 
-        /// <summary>
-        /// Lista todas as avaliações do avaliador logado
-        /// </summary>
         [HttpGet("minhas")]
         [ProducesResponseType(typeof(IEnumerable<AvaliacaoResposta>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -90,9 +75,6 @@ namespace SisEUs.API.Controllers
             return HandleResult(resultado);
         }
 
-        /// <summary>
-        /// Lista todas as avaliações de um evento
-        /// </summary>
         [HttpGet("evento/{eventoId:int}")]
         [ProducesResponseType(typeof(IEnumerable<AvaliacaoResposta>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -103,9 +85,6 @@ namespace SisEUs.API.Controllers
             return HandleResult(resultado);
         }
 
-        /// <summary>
-        /// Obtém o relatório detalhado de notas e pareceres de uma apresentação específica
-        /// </summary>
         [HttpGet("relatorio/apresentacao/{apresentacaoId:int}")]
         [ProducesResponseType(typeof(RelatorioApresentacaoResposta), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -116,9 +95,6 @@ namespace SisEUs.API.Controllers
             return HandleResult(resultado);
         }
 
-        /// <summary>
-        /// Obtém o relatório consolidado de notas e pareceres de todas as apresentações de um evento
-        /// </summary>
         [HttpGet("relatorio/evento/{eventoId:int}")]
         [ProducesResponseType(typeof(RelatorioEventoResposta), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

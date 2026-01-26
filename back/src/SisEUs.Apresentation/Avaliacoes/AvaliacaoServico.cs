@@ -36,13 +36,11 @@ namespace SisEUs.Application.Avaliacoes
                     return Resultado<AvaliacaoResposta>.Falha(TipoDeErro.NaoEncontrado, "Apresentação não encontrada.");
                 }
 
-                // Verificar se o avaliador já tem uma avaliação para esta apresentação
                 var avaliacaoExistente = await avaliacaoRepositorio.ObterPorApresentacaoEAvaliadorAsync(apresentacaoId, usuarioAtual.Id, cancellationToken);
                 if (avaliacaoExistente is not null)
                 {
                     logger.LogWarning("Avaliador {AvaliadorId} já possui avaliação para apresentação {ApresentacaoId}", usuarioAtual.Id, apresentacaoId);
                     
-                    // Se já existe, retorna a avaliação existente
                     var dtoExistente = MapearParaResposta(avaliacaoExistente);
                     return Resultado<AvaliacaoResposta>.Ok(dtoExistente);
                 }
@@ -52,7 +50,6 @@ namespace SisEUs.Application.Avaliacoes
                 await avaliacaoRepositorio.AdicionarAsync(avaliacao, cancellationToken);
                 await uow.CommitAsync(cancellationToken);
 
-                // Recarregar para obter a apresentação relacionada
                 avaliacao = await avaliacaoRepositorio.ObterPorIdAsync(avaliacao.Id, cancellationToken);
 
                 logger.LogInformation("Avaliação {AvaliacaoId} iniciada com sucesso para apresentação {ApresentacaoId}", avaliacao!.Id, apresentacaoId);

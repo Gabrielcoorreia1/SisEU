@@ -22,18 +22,12 @@ namespace SisEUs.Infrastructure.Migracao
             string senhaTexto = "Senha@123";
             string senhaHash = BCryptNet.HashPassword(senhaTexto);
 
-            // ============================================================
-            // USUÁRIOS - Admin, Professores, Avaliadores e Estudantes
-            // ============================================================
-
-            // Admin
             var admin = Usuario.CriarAdmin(
                 NomeCompleto.Criar("Admin", "Root"),
                 Cpf.Criar("15887784016"),
                 Email.Criar("admin@siseus.com"),
                 Senha.Criar(senhaHash));
 
-            // Professores/Organizadores
             var profCarlos = Usuario.CriarProfessor(
                 NomeCompleto.Criar("Carlos", "Eduardo Silva"),
                 Cpf.Criar("54449817001"),
@@ -52,7 +46,6 @@ namespace SisEUs.Infrastructure.Migracao
                 Email.Criar("roberto.almeida@siseus.com"),
                 Senha.Criar(senhaHash), "P003");
 
-            // Avaliadores (também são professores)
             var avalJuliana = Usuario.CriarProfessor(
                 NomeCompleto.Criar("Juliana", "Mendes"),
                 Cpf.Criar("63606935091"),
@@ -89,7 +82,6 @@ namespace SisEUs.Infrastructure.Migracao
                 Email.Criar("lucas.pereira@siseus.com"),
                 Senha.Criar(senhaHash), "A006");
 
-            // Estudantes
             var estAna = Usuario.CriarEstudante(
                 NomeCompleto.Criar("Ana", "Beatriz Lima"),
                 Cpf.Criar("77489284015"),
@@ -171,20 +163,12 @@ namespace SisEUs.Infrastructure.Migracao
             );
             await context.SaveChangesAsync();
 
-            // ============================================================
-            // CHECK-IN PIN
-            // ============================================================
             Random random = new();
             string pinInicial = random.Next(100000, 1000000).ToString("D6");
             var pinAtivo = CheckinPin.Criar(pinInicial);
             await context.CheckinPins.AddAsync(pinAtivo);
             await context.SaveChangesAsync();
 
-            // ============================================================
-            // EVENTOS
-            // ============================================================
-
-            // Evento 1: Semana de Tecnologia (evento grande, já aconteceu - com avaliações concluídas)
             var eventoTech = Evento.Criar(
                 Titulo.Criar("Semana de Tecnologia e Inovação 2024"),
                 new DateTime(2024, 11, 15, 8, 0, 0),
@@ -198,7 +182,6 @@ namespace SisEUs.Infrastructure.Migracao
                 ETipoEvento.Oral
             );
 
-            // Evento 2: Encontro de IA (em andamento - algumas avaliações em progresso)
             var eventoIA = Evento.Criar(
                 Titulo.Criar("Encontro de Inteligência Artificial"),
                 new DateTime(2025, 01, 20, 9, 0, 0),
@@ -212,7 +195,6 @@ namespace SisEUs.Infrastructure.Migracao
                 ETipoEvento.Oral
             );
 
-            // Evento 3: Mostra de Projetos (futuro - sem avaliações ainda)
             var eventoMostra = Evento.Criar(
                 Titulo.Criar("Mostra de Projetos de Extensão"),
                 new DateTime(2025, 03, 10, 14, 0, 0),
@@ -226,7 +208,6 @@ namespace SisEUs.Infrastructure.Migracao
                 ETipoEvento.Banner
             );
 
-            // Evento 4: Workshop de Desenvolvimento Web (passado, avaliado)
             var eventoWeb = Evento.Criar(
                 Titulo.Criar("Workshop de Desenvolvimento Web Moderno"),
                 new DateTime(2024, 10, 05, 8, 0, 0),
@@ -240,7 +221,6 @@ namespace SisEUs.Infrastructure.Migracao
                 ETipoEvento.Pitch
             );
 
-            // Evento 5: Simpósio de Pesquisa (futuro)
             var eventoSimposio = Evento.Criar(
                 Titulo.Criar("Simpósio de Pesquisa Científica"),
                 new DateTime(2025, 05, 20, 8, 0, 0),
@@ -254,7 +234,6 @@ namespace SisEUs.Infrastructure.Migracao
                 ETipoEvento.Oral
             );
 
-            // Evento 6: Hackathon (em andamento)
             var eventoHack = Evento.Criar(
                 Titulo.Criar("Hackathon de Soluções Sustentáveis"),
                 new DateTime(2025, 01, 25, 8, 0, 0),
@@ -271,18 +250,12 @@ namespace SisEUs.Infrastructure.Migracao
             await context.Eventos.AddRangeAsync(eventoTech, eventoIA, eventoMostra, eventoWeb, eventoSimposio, eventoHack);
             await context.SaveChangesAsync();
 
-            // ============================================================
-            // APRESENTAÇÕES
-            // ============================================================
-
-            // Apresentações do Evento Tech (já avaliadas)
             var apTech1 = Apresentacao.Criar(eventoTech.Id, Titulo.Criar("Aplicações de Machine Learning na Saúde"), "Ana Beatriz Lima", "Carlos Eduardo Silva", EModalidadeApresentacao.Oral);
             var apTech2 = Apresentacao.Criar(eventoTech.Id, Titulo.Criar("Blockchain para Rastreabilidade Alimentar"), "Bruno Henrique Castro", "Maria Fernanda Costa", EModalidadeApresentacao.Oral);
             var apTech3 = Apresentacao.Criar(eventoTech.Id, Titulo.Criar("IoT na Agricultura Familiar"), "Carla Dias Ferreira", "Roberto Almeida Junior", EModalidadeApresentacao.Oral);
             var apTech4 = Apresentacao.Criar(eventoTech.Id, Titulo.Criar("Realidade Aumentada na Educação"), "Daniel Martins", "Carlos Eduardo Silva", EModalidadeApresentacao.Oral);
             var apTech5 = Apresentacao.Criar(eventoTech.Id, Titulo.Criar("Chatbots Inteligentes para Atendimento"), "Elena Ribeiro", "Maria Fernanda Costa", EModalidadeApresentacao.Oral);
 
-            // Apresentações do Evento IA (algumas em avaliação)
             var apIA1 = Apresentacao.Criar(eventoIA.Id, Titulo.Criar("Redes Neurais Convolucionais para Diagnóstico Médico"), "Fabio Gomes", "Carlos Eduardo Silva", EModalidadeApresentacao.Oral);
             var apIA2 = Apresentacao.Criar(eventoIA.Id, Titulo.Criar("Processamento de Linguagem Natural em Português"), "Gabriela Nunes", "Roberto Almeida Junior", EModalidadeApresentacao.Oral);
             var apIA3 = Apresentacao.Criar(eventoIA.Id, Titulo.Criar("Visão Computacional para Segurança Pública"), "Hugo Teixeira", "Carlos Eduardo Silva", EModalidadeApresentacao.Oral);
@@ -290,18 +263,15 @@ namespace SisEUs.Infrastructure.Migracao
             var apIA5 = Apresentacao.Criar(eventoIA.Id, Titulo.Criar("Sistemas de Recomendação com Deep Learning"), "João Victor Souza", "Carlos Eduardo Silva", EModalidadeApresentacao.Oral);
             var apIA6 = Apresentacao.Criar(eventoIA.Id, Titulo.Criar("Ética em Inteligência Artificial"), "Karina Lopes", "Roberto Almeida Junior", EModalidadeApresentacao.Oral);
 
-            // Apresentações da Mostra (pendentes)
             var apMostra1 = Apresentacao.Criar(eventoMostra.Id, Titulo.Criar("Horta Comunitária Inteligente"), "Leonardo Barros", "Maria Fernanda Costa", EModalidadeApresentacao.Poster);
             var apMostra2 = Apresentacao.Criar(eventoMostra.Id, Titulo.Criar("App de Carona Solidária"), "Ana Beatriz Lima", "Maria Fernanda Costa", EModalidadeApresentacao.Poster);
             var apMostra3 = Apresentacao.Criar(eventoMostra.Id, Titulo.Criar("Plataforma de Doações"), "Bruno Henrique Castro", "Maria Fernanda Costa", EModalidadeApresentacao.Poster);
             var apMostra4 = Apresentacao.Criar(eventoMostra.Id, Titulo.Criar("Sistema de Gestão para ONGs"), "Carla Dias Ferreira", "Maria Fernanda Costa", EModalidadeApresentacao.Poster);
 
-            // Apresentações do Workshop Web (avaliadas)
             var apWeb1 = Apresentacao.Criar(eventoWeb.Id, Titulo.Criar("API REST com .NET 8"), "Daniel Martins", "Roberto Almeida Junior", EModalidadeApresentacao.Pitch);
             var apWeb2 = Apresentacao.Criar(eventoWeb.Id, Titulo.Criar("Frontend com React e TypeScript"), "Elena Ribeiro", "Roberto Almeida Junior", EModalidadeApresentacao.Pitch);
             var apWeb3 = Apresentacao.Criar(eventoWeb.Id, Titulo.Criar("Microsserviços com Docker"), "Fabio Gomes", "Roberto Almeida Junior", EModalidadeApresentacao.Pitch);
 
-            // Apresentações do Simpósio (pendentes)
             var apSimp1 = Apresentacao.Criar(eventoSimposio.Id, Titulo.Criar("Computação Quântica: Estado da Arte"), "Gabriela Nunes", "Carlos Eduardo Silva", EModalidadeApresentacao.Oral);
             var apSimp2 = Apresentacao.Criar(eventoSimposio.Id, Titulo.Criar("Segurança Cibernética em Infraestruturas Críticas"), "Hugo Teixeira", "Maria Fernanda Costa", EModalidadeApresentacao.Oral);
             var apSimp3 = Apresentacao.Criar(eventoSimposio.Id, Titulo.Criar("Big Data na Tomada de Decisões"), "Isabela Moreira", "Roberto Almeida Junior", EModalidadeApresentacao.Oral);
@@ -309,7 +279,6 @@ namespace SisEUs.Infrastructure.Migracao
             var apSimp5 = Apresentacao.Criar(eventoSimposio.Id, Titulo.Criar("Acessibilidade Digital"), "Karina Lopes", "Maria Fernanda Costa", EModalidadeApresentacao.Oral);
             var apSimp6 = Apresentacao.Criar(eventoSimposio.Id, Titulo.Criar("DevOps e Cultura de Qualidade"), "Leonardo Barros", "Roberto Almeida Junior", EModalidadeApresentacao.Oral);
 
-            // Apresentações do Hackathon (em avaliação)
             var apHack1 = Apresentacao.Criar(eventoHack.Id, Titulo.Criar("App de Coleta Seletiva Gamificada"), "Ana Beatriz Lima", "Carlos Eduardo Silva", EModalidadeApresentacao.Pitch);
             var apHack2 = Apresentacao.Criar(eventoHack.Id, Titulo.Criar("Plataforma de Energia Solar Compartilhada"), "Bruno Henrique Castro", "Roberto Almeida Junior", EModalidadeApresentacao.Pitch);
             var apHack3 = Apresentacao.Criar(eventoHack.Id, Titulo.Criar("Sistema de Monitoramento de Água"), "Carla Dias Ferreira", "Carlos Eduardo Silva", EModalidadeApresentacao.Pitch);
@@ -325,14 +294,8 @@ namespace SisEUs.Infrastructure.Migracao
             );
             await context.SaveChangesAsync();
 
-            // ============================================================
-            // AVALIAÇÕES
-            // ============================================================
-
-            // Avaliações CONCLUÍDAS - Evento Tech (todas as apresentações já avaliadas por múltiplos avaliadores)
             var avaliacoes = new List<Avaliacao>();
 
-            // Tech 1 - Avaliada por Juliana, Renato e Patricia
             var avTech1_1 = Avaliacao.Iniciar(apTech1.Id, avalJuliana.Id);
             avTech1_1.Avaliar(9.5m, "Excelente trabalho! Metodologia sólida e resultados promissores. Aplicação prática muito relevante para a área de saúde.");
             var avTech1_2 = Avaliacao.Iniciar(apTech1.Id, avalRenato.Id);
@@ -340,61 +303,44 @@ namespace SisEUs.Infrastructure.Migracao
             var avTech1_3 = Avaliacao.Iniciar(apTech1.Id, avalPatricia.Id);
             avTech1_3.Avaliar(9.0m, "Trabalho inovador com grande potencial de impacto social. Apresentação clara e objetiva.");
 
-            // Tech 2
             var avTech2_1 = Avaliacao.Iniciar(apTech2.Id, avalJuliana.Id);
             avTech2_1.Avaliar(8.0m, "Proposta interessante. A implementação do blockchain está bem fundamentada, mas faltou demonstração prática.");
             var avTech2_2 = Avaliacao.Iniciar(apTech2.Id, avalRenato.Id);
             avTech2_2.Avaliar(7.5m, "Conceito válido, porém a escalabilidade precisa ser melhor abordada.");
 
-            // Tech 3
             var avTech3_1 = Avaliacao.Iniciar(apTech3.Id, avalPatricia.Id);
             avTech3_1.Avaliar(9.0m, "Projeto com forte impacto social. A integração IoT foi bem executada.");
             var avTech3_2 = Avaliacao.Iniciar(apTech3.Id, avalJuliana.Id);
             avTech3_2.Avaliar(8.5m, "Muito relevante para o contexto regional. Boa documentação técnica.");
 
-            // Tech 4
             var avTech4_1 = Avaliacao.Iniciar(apTech4.Id, avalRenato.Id);
             avTech4_1.Avaliar(8.0m, "Aplicação educacional interessante. Interface bem projetada.");
             var avTech4_2 = Avaliacao.Iniciar(apTech4.Id, avalPatricia.Id);
             avTech4_2.Avaliar(8.5m, "Potencial pedagógico significativo. Testes com usuários foram convincentes.");
 
-            // Tech 5
             var avTech5_1 = Avaliacao.Iniciar(apTech5.Id, avalJuliana.Id);
             avTech5_1.Avaliar(7.5m, "Chatbot funcional, mas precisa melhorar a compreensão de contexto.");
             var avTech5_2 = Avaliacao.Iniciar(apTech5.Id, avalRenato.Id);
             avTech5_2.Avaliar(7.0m, "Ideia boa, implementação básica. Sugestão: incorporar mais intents.");
 
-            // Avaliações EM ANDAMENTO - Evento IA (algumas concluídas, outras em avaliação, outras pendentes)
-            // IA 1 - Concluída
             var avIA1_1 = Avaliacao.Iniciar(apIA1.Id, avalFernando.Id);
             avIA1_1.Avaliar(9.0m, "Modelo CNN bem treinado com excelente acurácia. Dataset adequado.");
             var avIA1_2 = Avaliacao.Iniciar(apIA1.Id, avalCamila.Id);
             avIA1_2.Avaliar(8.5m, "Resultados impressionantes. Sugiro validação com mais especialistas médicos.");
 
-            // IA 2 - Em avaliação (iniciada mas não concluída)
             var avIA2_1 = Avaliacao.Iniciar(apIA2.Id, avalLucas.Id);
-            // Não chama Avaliar() - fica em estado EmAvaliacao
             var avIA2_2 = Avaliacao.Iniciar(apIA2.Id, avalFernando.Id);
             avIA2_2.Avaliar(8.0m, "Corpus bem construído. Modelo apresenta bons resultados para português brasileiro.");
 
-            // IA 3 - Uma concluída, uma em avaliação
             var avIA3_1 = Avaliacao.Iniciar(apIA3.Id, avalCamila.Id);
             avIA3_1.Avaliar(7.5m, "Questões de privacidade precisam ser melhor endereçadas.");
             var avIA3_2 = Avaliacao.Iniciar(apIA3.Id, avalLucas.Id);
-            // Em avaliação
 
-            // IA 4 - Pendente (sem avaliações iniciadas ainda)
-            // Não cria avaliação
-
-            // IA 5 - Em avaliação
             var avIA5_1 = Avaliacao.Iniciar(apIA5.Id, avalFernando.Id);
-            // Em avaliação
 
-            // IA 6 - Uma concluída
             var avIA6_1 = Avaliacao.Iniciar(apIA6.Id, avalCamila.Id);
             avIA6_1.Avaliar(9.5m, "Discussão ética fundamental e muito bem conduzida. Referências atualizadas.");
 
-            // Avaliações CONCLUÍDAS - Workshop Web
             var avWeb1_1 = Avaliacao.Iniciar(apWeb1.Id, avalPatricia.Id);
             avWeb1_1.Avaliar(9.0m, "API bem estruturada seguindo boas práticas. Documentação Swagger completa.");
             var avWeb1_2 = Avaliacao.Iniciar(apWeb1.Id, avalFernando.Id);
@@ -410,19 +356,14 @@ namespace SisEUs.Infrastructure.Migracao
             var avWeb3_2 = Avaliacao.Iniciar(apWeb3.Id, avalFernando.Id);
             avWeb3_2.Avaliar(8.0m, "Arquitetura de microsserviços bem planejada. Comunicação entre serviços adequada.");
 
-            // Avaliações EM ANDAMENTO - Hackathon (algumas em avaliação, algumas concluídas)
             var avHack1_1 = Avaliacao.Iniciar(apHack1.Id, avalCamila.Id);
-            // Em avaliação
             var avHack1_2 = Avaliacao.Iniciar(apHack1.Id, avalLucas.Id);
             avHack1_2.Avaliar(8.5m, "Gamificação bem implementada. App intuitivo e engajante.");
 
             var avHack2_1 = Avaliacao.Iniciar(apHack2.Id, avalCamila.Id);
-            // Em avaliação
 
             var avHack3_1 = Avaliacao.Iniciar(apHack3.Id, avalLucas.Id);
             avHack3_1.Avaliar(9.0m, "Solução completa com sensores e dashboard. Grande potencial de mercado.");
-
-            // Hack4 - Pendente (sem avaliações)
 
             avaliacoes.AddRange(new[]
             {
@@ -447,11 +388,6 @@ namespace SisEUs.Infrastructure.Migracao
             await context.Avaliacoes.AddRangeAsync(avaliacoes);
             await context.SaveChangesAsync();
 
-            // ============================================================
-            // PRESENÇAS (Check-ins em eventos passados)
-            // ============================================================
-
-            // Presenças no Evento Tech (passado - todos fizeram check-in e check-out)
             var presencas = new List<Presenca>();
 
             var presTech1 = Presenca.Criar(estAna.Id, eventoTech.Id, "-5.184846", "-40.651807");
@@ -474,7 +410,6 @@ namespace SisEUs.Infrastructure.Migracao
             presTech5.RealizarCheckIn(new DateTime(2024, 11, 15, 8, 10, 0));
             presTech5.RealizarCheckOut(new DateTime(2024, 11, 15, 17, 50, 0));
 
-            // Presenças no Workshop Web (passado)
             var presWeb1 = Presenca.Criar(estDaniel.Id, eventoWeb.Id, "-5.184846", "-40.651807");
             presWeb1.RealizarCheckIn(new DateTime(2024, 10, 05, 8, 00, 0));
             presWeb1.RealizarCheckOut(new DateTime(2024, 10, 05, 12, 00, 0));

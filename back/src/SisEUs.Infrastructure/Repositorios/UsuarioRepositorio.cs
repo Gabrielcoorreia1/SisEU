@@ -14,10 +14,16 @@ namespace SisEUs.Infrastructure.Repositorios
             await _context.Usuarios.AddAsync(usuario, cancellationToken);
         }
 
+        public void Atualizar(Usuario usuario)
+        {
+            _context.Usuarios.Update(usuario);
+        }
+
         public async Task<bool> CpfJaExisteAsync(Cpf cpf, CancellationToken cancellationToken = default)
         {
             return await _context.Usuarios.AnyAsync(u => u.Cpf == cpf, cancellationToken);
         }
+        
         public async Task<Usuario?> ObterPorCpfAsync(Cpf cpf, CancellationToken cancellationToken = default)
         {
             return await _context.Usuarios.FirstOrDefaultAsync(u => u.Cpf == cpf, cancellationToken);
@@ -40,7 +46,7 @@ namespace SisEUs.Infrastructure.Repositorios
 
         public Task<IEnumerable<Usuario>> ObterPorIdsAsync(IEnumerable<int> ids, CancellationToken cancellationToken = default)
         {
-            var lista = ids.ToList(); // Materializa para evitar múltiplas enumerações
+            var lista = ids.ToList();
             return _context.Usuarios
                 .Where(u => lista.Contains(u.Id))
                 .ToListAsync(cancellationToken)
@@ -63,6 +69,7 @@ namespace SisEUs.Infrastructure.Repositorios
         {
             return await _context.Usuarios.AsNoTracking().ToListAsync();
         }
+        
         public async Task<Usuario?> ObterPorUserIdentifierAsync(Guid userIdentifier, CancellationToken cancellationToken = default)
         {
             return await _context.Usuarios

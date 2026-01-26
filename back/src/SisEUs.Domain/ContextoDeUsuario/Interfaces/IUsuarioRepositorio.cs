@@ -11,6 +11,7 @@ namespace SisEUs.Domain.ContextoDeUsuario.Interfaces
         Task<bool> CpfJaExisteAsync(Cpf cpf, CancellationToken cancellationToken = default);
         Task<bool> EmailJaExisteAsync(Email email, CancellationToken cancellationToken = default);
         Task AdicionarAsync(Usuario usuario, CancellationToken cancellationToken = default);
+        void Atualizar(Usuario usuario);
         Task<Usuario?> ObterPorCpfAsync(Cpf cpf, CancellationToken cancellationToken = default);
         Task<IEnumerable<Usuario>> BuscarPorNomeProfessorAsync(string nome, CancellationToken cancellationToken = default);
         Task<IEnumerable<Usuario>> ObterTodosUsuariosAsync();

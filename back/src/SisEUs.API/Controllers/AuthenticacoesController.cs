@@ -5,6 +5,7 @@ using SisEUs.Application.Authenticacoes.DTOs.Resposta;
 using SisEUs.Application.Authenticacoes.DTOs.Solicitacoes;
 using SisEUs.Application.Comum.DTOs;
 using SisEUs.Application.Eventos.DTOs.Resposta;
+using SisEUs.Domain.ContextoDeUsuario.Enumeracoes;
 
 namespace SisEUs.API.Controllers
 {
@@ -57,6 +58,28 @@ namespace SisEUs.API.Controllers
         public async Task<IActionResult> BuscarUsuarioLogado(int id, CancellationToken cancellationToken)
         {
             var resultado = await authService.BuscarPorIdAsync(id, cancellationToken);
+            return HandleResult(resultado);
+        }
+
+        [HttpPut("{id:int}/tornar-professor")]
+        [AuthorizeRoles(ETipoUsuario.Admin)]
+        [ProducesResponseType(typeof(UsuarioResposta), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> TornarProfessorAsync(int id, CancellationToken cancellationToken)
+        {
+            var resultado = await authService.TornarProfessorAsync(id, cancellationToken);
+            return HandleResult(resultado);
+        }
+
+        [HttpPut("{id:int}/tornar-avaliador")]
+        [AuthorizeRoles(ETipoUsuario.Admin)]
+        [ProducesResponseType(typeof(UsuarioResposta), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> TornarAvaliadorAsync(int id, CancellationToken cancellationToken)
+        {
+            var resultado = await authService.TornarAvaliadorAsync(id, cancellationToken);
             return HandleResult(resultado);
         }
     }

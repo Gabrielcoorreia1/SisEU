@@ -66,6 +66,15 @@ namespace SisEUs.Domain.ContextoDeUsuario.Entidades
 
             EUserType = ETipoUsuario.Professor;
         }
+
+        public void TornarAvaliador()
+        {
+            if (EUserType == ETipoUsuario.Avaliador)
+                throw new UsuarioJaEAvaliadorExcecao();
+
+            EUserType = ETipoUsuario.Avaliador;
+        }
+
         public void DefinirMatricula(string matricula)
         {
             if (string.IsNullOrWhiteSpace(matricula))

@@ -148,5 +148,59 @@ namespace SisEUs.Application.Authenticacoes
                 Email: usuario.Email.Valor
             ));
         }
+
+        public async Task<Resultado<UsuarioResposta>> TornarProfessorAsync(int usuarioId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var usuario = await usuarioRepositorio.ObterPorIdAsync(usuarioId, cancellationToken);
+
+                if (usuario is null)
+                    return Resultado<UsuarioResposta>.Falha(TipoDeErro.NaoEncontrado, "Usuário não encontrado.");
+
+                usuario.TornarProfessor();
+                
+                usuarioRepositorio.Atualizar(usuario);
+                await uow.CommitAsync(cancellationToken);
+
+                return Resultado<UsuarioResposta>.Ok(new UsuarioResposta(
+                    Id: usuario.Id,
+                    NomeCompleto: $"{usuario.Nome.Nome} {usuario.Nome.Sobrenome}",
+                    Cpf: usuario.Cpf.Valor,
+                    Email: usuario.Email.Valor
+                ));
+            }
+            catch (ExcecaoDeDominio ex)
+            {
+                return Resultado<UsuarioResposta>.Falha(TipoDeErro.Validacao, ex.Message);
+            }
+        }
+
+        public async Task<Resultado<UsuarioResposta>> TornarAvaliadorAsync(int usuarioId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var usuario = await usuarioRepositorio.ObterPorIdAsync(usuarioId, cancellationToken);
+
+                if (usuario is null)
+                    return Resultado<UsuarioResposta>.Falha(TipoDeErro.NaoEncontrado, "Usuário não encontrado.");
+
+                usuario.TornarAvaliador();
+                
+                usuarioRepositorio.Atualizar(usuario);
+                await uow.CommitAsync(cancellationToken);
+
+                return Resultado<UsuarioResposta>.Ok(new UsuarioResposta(
+                    Id: usuario.Id,
+                    NomeCompleto: $"{usuario.Nome.Nome} {usuario.Nome.Sobrenome}",
+                    Cpf: usuario.Cpf.Valor,
+                    Email: usuario.Email.Valor
+                ));
+            }
+            catch (ExcecaoDeDominio ex)
+            {
+                return Resultado<UsuarioResposta>.Falha(TipoDeErro.Validacao, ex.Message);
+            }
+        }
     }
 }
