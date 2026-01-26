@@ -1,0 +1,587 @@
+﻿###############################################################################
+# SisEUs API - Mock Requests para Testes Manuais
+# Use este arquivo no Visual Studio 2022 (HTTP Client) ou VS Code (REST Client)
+###############################################################################
+
+@baseUrl = https://localhost:7102/api
+@contentType = application/json
+
+###############################################################################
+# ⚠️ IMPORTANTE - COMO USAR:
+# 1. Execute primeiro um dos requests de LOGIN abaixo
+# 2. Copie o valor do campo "token" da resposta
+# 3. Cole o token na variável @token abaixo (substitua SEU_TOKEN_AQUI)
+# 4. Agora você pode executar os demais requests autenticados
+###############################################################################
+
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0ZmRlMDgzMC02N2Q1LTRiN2MtODE3Zi1kZTUzNTMzNDVmODIiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9zaWQiOiI0ZmRlMDgzMC02N2Q1LTRiN2MtODE3Zi1kZTUzNTMzNDVmODIiLCJuYW1laWQiOiIxIiwianRpIjoiYzBlZjlmNjctODQxNS00MjRhLTkxZDctZWYyZmMxMzFmMTNlIiwiZW1haWwiOiJhZG1pbkBzaXNldXMuY29tIiwicm9sZSI6WyJBZG1pbiIsIkFkbWluIl0sIm5vbWUiOiJOb21lQ29tcGxldG8geyBOb21lID0gQWRtaW4sIFNvYnJlbm9tZSA9IFJvb3QgfSIsIm5iZiI6MTc2OTQwNjY1OSwiZXhwIjoxNzY5NDA4NDU5LCJpYXQiOjE3Njk0MDY2NTl9.XyMDGP5vq_HjIIA_1_oVNZFcgPMmYQtj_7FuDuLhP2k
+
+###############################################################################
+# 🔐 AUTENTICAÇÃO - EXECUTE PRIMEIRO!
+###############################################################################
+
+### 1. Login como ADMIN (CPF: 15887784016 | Senha: Senha@123)
+# @name loginAdmin
+POST {{baseUrl}}/authenticacoes/login
+Content-Type: {{contentType}}
+
+{
+    "cpf": "15887784016",
+    "senha": "Senha@123"
+}
+
+### 2. Login como PROFESSOR - Carlos (CPF: 54449817001 | Senha: Senha@123)
+# @name loginProfessor
+POST {{baseUrl}}/authenticacoes/login
+Content-Type: {{contentType}}
+
+{
+    "cpf": "54449817001",
+    "senha": "Senha@123"
+}
+
+### 3. Login como PROFESSOR - Maria (CPF: 82736451092 | Senha: Senha@123)
+# @name loginProfessorMaria
+POST {{baseUrl}}/authenticacoes/login
+Content-Type: {{contentType}}
+
+{
+    "cpf": "82736451092",
+    "senha": "Senha@123"
+}
+
+### 4. Login como AVALIADORA - Juliana (CPF: 63606935091 | Senha: Senha@123)
+# @name loginAvaliadora
+POST {{baseUrl}}/authenticacoes/login
+Content-Type: {{contentType}}
+
+{
+    "cpf": "63606935091",
+    "senha": "Senha@123"
+}
+
+### 5. Login como AVALIADOR - Fernando (CPF: 48291637502 | Senha: Senha@123)
+# @name loginAvaliadorFernando
+POST {{baseUrl}}/authenticacoes/login
+Content-Type: {{contentType}}
+
+{
+    "cpf": "48291637502",
+    "senha": "Senha@123"
+}
+
+### 6. Login como AVALIADORA - Camila (CPF: 85739264101 | Senha: Senha@123)
+# @name loginAvaliadoraCamila
+POST {{baseUrl}}/authenticacoes/login
+Content-Type: {{contentType}}
+
+{
+    "cpf": "85739264101",
+    "senha": "Senha@123"
+}
+
+### 7. Login como ESTUDANTE - Ana (CPF: 77489284015 | Senha: Senha@123)
+# @name loginEstudanteAna
+POST {{baseUrl}}/authenticacoes/login
+Content-Type: {{contentType}}
+
+{
+    "cpf": "77489284015",
+    "senha": "Senha@123"
+}
+
+### 8. Login como ESTUDANTE - Bruno (CPF: 42294419081 | Senha: Senha@123)
+# @name loginEstudanteBruno
+POST {{baseUrl}}/authenticacoes/login
+Content-Type: {{contentType}}
+
+{
+    "cpf": "42294419081",
+    "senha": "Senha@123"
+}
+
+### 9. Registrar novo usuário (NÃO precisa de token)
+POST {{baseUrl}}/authenticacoes/registrar
+Content-Type: {{contentType}}
+
+{
+    "primeiroNome": "Teste",
+    "sobrenome": "Novo Usuario",
+    "cpf": "12345678901",
+    "email": "teste@email.com",
+    "senha": "Senha@123"
+}
+
+### 10. Buscar usuários por nome
+GET {{baseUrl}}/authenticacoes/buscar?nome=Carlos
+Authorization: Bearer {{token}}
+
+### 11. Buscar usuário por ID
+GET {{baseUrl}}/authenticacoes/1
+Authorization: Bearer {{token}}
+
+###############################################################################
+# 📅 EVENTOS
+###############################################################################
+
+### 12. Listar todos os eventos (paginado)
+GET {{baseUrl}}/eventos?pagina=1&tamanho=10
+Authorization: Bearer {{token}}
+
+### 13. Obter evento por ID - Semana de Tecnologia (ID: 1)
+GET {{baseUrl}}/eventos/1
+Authorization: Bearer {{token}}
+
+### 14. Obter evento por ID - Encontro de IA (ID: 2)
+GET {{baseUrl}}/eventos/2
+Authorization: Bearer {{token}}
+
+### 15. Obter evento por ID - Mostra de Projetos (ID: 3)
+GET {{baseUrl}}/eventos/3
+Authorization: Bearer {{token}}
+
+### 16. Obter evento por código único - TECH24
+GET {{baseUrl}}/eventos/por-codigo?codigo=TECH24
+Authorization: Bearer {{token}}
+
+### 17. Obter evento por código único - IA2025
+GET {{baseUrl}}/eventos/por-codigo?codigo=IA2025
+Authorization: Bearer {{token}}
+
+### 18. Criar novo evento (Admin/Professor)
+POST {{baseUrl}}/eventos
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+    "titulo": "Workshop de DevOps 2025",
+    "dataInicio": "2025-04-15T09:00:00",
+    "dataFim": "2025-04-15T18:00:00",
+    "local": {
+        "campus": 1,
+        "departamento": "Computação",
+        "bloco": "A",
+        "sala": "Lab 02"
+    },
+    "eTipoEvento": 2,
+    "avaliadores": [5, 6, 7],
+    "imgUrl": "https://exemplo.com/devops.jpg",
+    "codigoUnico": "DEVOPS25",
+    "apresentacoes": [
+        {
+            "id": null,
+            "eventoId": 0,
+            "titulo": "CI/CD com GitHub Actions",
+            "nomeAutor": "Hugo Teixeira",
+            "nomeOrientador": "Roberto Almeida Junior",
+            "modalidade": 1
+        },
+        {
+            "id": null,
+            "eventoId": 0,
+            "titulo": "Kubernetes na Prática",
+            "nomeAutor": "Isabela Moreira",
+            "nomeOrientador": "Carlos Eduardo Silva",
+            "modalidade": 1
+        }
+    ]
+}
+
+### 19. Atualizar evento (Admin/Professor)
+PUT {{baseUrl}}/eventos/2
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+    "id": 2,
+    "titulo": "Encontro de Inteligência Artificial - Edição Especial",
+    "dataInicio": "2025-01-20T09:00:00",
+    "dataFim": "2025-01-20T18:00:00",
+    "local": {
+        "campus": 1,
+        "departamento": "Computação",
+        "bloco": "A",
+        "sala": "Auditório"
+    },
+    "eTipoEvento": 2,
+    "imgUrl": "https://exemplo.com/ia-especial.jpg",
+    "codigoUnico": "IA2025",
+    "avaliadores": [8, 9, 10],
+    "apresentacoes": []
+}
+
+### 20. Adicionar participante ao evento
+POST {{baseUrl}}/eventos/2/participantes
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+15
+
+### 21. Remover participante do evento
+DELETE {{baseUrl}}/eventos/2/participantes/15
+Authorization: Bearer {{token}}
+
+### 22. Adicionar avaliador ao evento
+POST {{baseUrl}}/eventos/3/avaliadores
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+8
+
+### 23. Remover avaliador do evento
+DELETE {{baseUrl}}/eventos/3/avaliadores/8
+Authorization: Bearer {{token}}
+
+### 24. Excluir evento (Admin)
+DELETE {{baseUrl}}/eventos/7
+Authorization: Bearer {{token}}
+
+###############################################################################
+# 🎤 APRESENTAÇÕES
+###############################################################################
+
+### 25. Listar apresentações do Evento Tech (ID: 1) - 5 apresentações
+GET {{baseUrl}}/apresentacoes/evento/1
+Authorization: Bearer {{token}}
+
+### 26. Listar apresentações do Evento IA (ID: 2) - 6 apresentações
+GET {{baseUrl}}/apresentacoes/evento/2
+Authorization: Bearer {{token}}
+
+### 27. Listar apresentações da Mostra (ID: 3) - 4 apresentações
+GET {{baseUrl}}/apresentacoes/evento/3
+Authorization: Bearer {{token}}
+
+### 28. Listar apresentações do Workshop Web (ID: 4) - 3 apresentações
+GET {{baseUrl}}/apresentacoes/evento/4
+Authorization: Bearer {{token}}
+
+### 29. Listar apresentações do Simpósio (ID: 5) - 6 apresentações (pendentes)
+GET {{baseUrl}}/apresentacoes/evento/5
+Authorization: Bearer {{token}}
+
+### 30. Listar apresentações do Hackathon (ID: 6) - 4 apresentações
+GET {{baseUrl}}/apresentacoes/evento/6
+Authorization: Bearer {{token}}
+
+### 31. Obter apresentação por ID
+GET {{baseUrl}}/apresentacoes/1
+Authorization: Bearer {{token}}
+
+### 32. Criar apresentação em evento existente (Admin/Professor)
+POST {{baseUrl}}/apresentacoes/5
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+    "id": null,
+    "eventoId": 5,
+    "titulo": "Inteligência Artificial Explicável",
+    "nomeAutor": "Leonardo Barros",
+    "nomeOrientador": "Maria Fernanda Costa",
+    "modalidade": 1
+}
+
+### 33. Atualizar apresentação (Admin/Professor)
+PUT {{baseUrl}}/apresentacoes/1
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+    "id": 1,
+    "titulo": "Machine Learning Aplicado à Saúde Pública",
+    "nomeAutor": "Ana Beatriz Lima",
+    "nomeOrientador": "Prof. Dr. Carlos Eduardo Silva"
+}
+
+### 34. Excluir apresentação (Admin)
+DELETE {{baseUrl}}/apresentacoes/28
+Authorization: Bearer {{token}}
+
+###############################################################################
+# ⭐ AVALIAÇÕES
+###############################################################################
+
+### 35. Obter avaliação por ID (avaliação concluída)
+GET {{baseUrl}}/avaliacoes/1
+Authorization: Bearer {{token}}
+
+### 36. Listar avaliações da apresentação 1 (ML na Saúde - 3 avaliações concluídas)
+GET {{baseUrl}}/avaliacoes/apresentacao/1
+Authorization: Bearer {{token}}
+
+### 37. Listar avaliações da apresentação 7 (PLN - 1 em andamento, 1 concluída)
+GET {{baseUrl}}/avaliacoes/apresentacao/7
+Authorization: Bearer {{token}}
+
+### 38. Listar avaliações da apresentação 9 (IA Generativa - sem avaliações)
+GET {{baseUrl}}/avaliacoes/apresentacao/9
+Authorization: Bearer {{token}}
+
+### 39. Listar minhas avaliações (como avaliador logado)
+# Logue como avaliador antes (Juliana, Fernando, Camila, etc.)
+GET {{baseUrl}}/avaliacoes/minhas
+Authorization: Bearer {{token}}
+
+### 40. Listar avaliações do evento Tech (ID: 1) - todas concluídas
+GET {{baseUrl}}/avaliacoes/evento/1
+Authorization: Bearer {{token}}
+
+### 41. Listar avaliações do evento IA (ID: 2) - mistas (concluídas e em andamento)
+GET {{baseUrl}}/avaliacoes/evento/2
+Authorization: Bearer {{token}}
+
+### 42. Listar avaliações do Hackathon (ID: 6) - em andamento
+GET {{baseUrl}}/avaliacoes/evento/6
+Authorization: Bearer {{token}}
+
+### 43. Iniciar avaliação de apresentação pendente (apresentação 9 - IA Generativa)
+# Logue como avaliador do evento IA (Fernando, Camila ou Lucas)
+POST {{baseUrl}}/avaliacoes/iniciar
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+    "apresentacaoId": 9
+}
+
+### 44. Iniciar avaliação de apresentação do Simpósio (pendentes)
+POST {{baseUrl}}/avaliacoes/iniciar
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+    "apresentacaoId": 19
+}
+
+### 45. Enviar avaliação com nota e parecer
+# Use o ID da avaliação iniciada no passo anterior
+POST {{baseUrl}}/avaliacoes/1/enviar
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+    "nota": 8.5,
+    "parecer": "Trabalho muito bem elaborado. A metodologia está clara e os resultados são consistentes. Recomendo para publicação com pequenas revisões."
+}
+
+### 46. Relatório de avaliações da apresentação 1 (ML na Saúde)
+GET {{baseUrl}}/avaliacoes/relatorio/apresentacao/1
+Authorization: Bearer {{token}}
+
+### 47. Relatório consolidado do evento Tech (ID: 1)
+GET {{baseUrl}}/avaliacoes/relatorio/evento/1
+Authorization: Bearer {{token}}
+
+### 48. Relatório consolidado do evento Web (ID: 4)
+GET {{baseUrl}}/avaliacoes/relatorio/evento/4
+Authorization: Bearer {{token}}
+
+###############################################################################
+# ✅ PRESENÇAS (Check-in/Check-out por Evento)
+###############################################################################
+
+### 49. Efetuar Check-In em evento (Evento IA - ID: 2)
+POST {{baseUrl}}/presencas/check-in
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+    "eventoId": 2,
+    "latitude": "-5.184846",
+    "longitude": "-40.651807"
+}
+
+### 50. Efetuar Check-Out de evento
+POST {{baseUrl}}/presencas/check-out
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+    "eventoId": 2,
+    "latitude": "-5.184846",
+    "longitude": "-40.651807"
+}
+
+### 51. Obter presença por ID
+GET {{baseUrl}}/presencas/1
+Authorization: Bearer {{token}}
+
+### 52. Listar presenças do evento Tech (ID: 1) - 5 presenças completas
+GET {{baseUrl}}/presencas/evento/1
+Authorization: Bearer {{token}}
+
+### 53. Listar presenças do evento Web (ID: 4) - 3 presenças completas
+GET {{baseUrl}}/presencas/evento/4
+Authorization: Bearer {{token}}
+
+### 54. Obter relatório de presenças (Admin/Professor)
+GET {{baseUrl}}/presencas/relatorio
+Authorization: Bearer {{token}}
+
+### 55. Obter status de presença em evento
+GET {{baseUrl}}/presencas/status/evento/1
+Authorization: Bearer {{token}}
+
+### 56. Verificar se tem presença em evento em andamento
+GET {{baseUrl}}/presencas/evento-em-andamento
+Authorization: Bearer {{token}}
+
+###############################################################################
+# 📍 CHECK-IN GLOBAL (por PIN)
+###############################################################################
+
+### 57. Obter PIN ativo
+GET {{baseUrl}}/checkin/pin-ativo
+Authorization: Bearer {{token}}
+
+### 58. Gerar novo PIN (Admin)
+POST {{baseUrl}}/checkin/pin
+Authorization: Bearer {{token}}
+
+### 59. Validar PIN (NÃO precisa de autenticação)
+POST {{baseUrl}}/checkin/validar-pin
+Content-Type: {{contentType}}
+
+{
+    "pin": "123456"
+}
+
+### 60. Registrar Check-in com PIN
+POST {{baseUrl}}/checkin/registrar
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+    "pin": "123456",
+    "latitude": "-5.184846",
+    "longitude": "-40.651807"
+}
+
+### 61. Registrar Check-out global
+POST {{baseUrl}}/checkin/checkout
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
+
+{
+    "latitude": "-5.184846",
+    "longitude": "-40.651807"
+}
+
+### 62. Obter relatório de check-ins (Admin/Professor)
+GET {{baseUrl}}/checkin/relatorio
+Authorization: Bearer {{token}}
+
+###############################################################################
+# 📋 REFERÊNCIA RÁPIDA - DADOS DO SEED
+###############################################################################
+#
+# ═══════════════════════════════════════════════════════════════════════════
+# USUÁRIOS (Senha: Senha@123 para todos)
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# ADMIN:
+# | ID | Nome        | CPF         | Email              |
+# |----|-------------|-------------|---------------------|
+# | 1  | Admin Root  | 15887784016 | admin@siseus.com    |
+#
+# PROFESSORES/ORGANIZADORES:
+# | ID | Nome                  | CPF         | Email                    |
+# |----|----------------------|-------------|--------------------------|
+# | 2  | Carlos Eduardo Silva | 54449817001 | carlos.silva@siseus.com  |
+# | 3  | Maria Fernanda Costa | 82736451092 | maria.costa@siseus.com   |
+# | 4  | Roberto Almeida Jr   | 91827364501 | roberto.almeida@siseus.com|
+#
+# AVALIADORES (também professores):
+# | ID | Nome              | CPF         | Email                      |
+# |----|-------------------|-------------|----------------------------|
+# | 5  | Juliana Mendes    | 63606935091 | juliana.mendes@siseus.com  |
+# | 6  | Renato Oliveira   | 34824360064 | renato.oliveira@siseus.com |
+# | 7  | Patricia Santos   | 72615948302 | patricia.santos@siseus.com |
+# | 8  | Fernando Souza    | 48291637502 | fernando.souza@siseus.com  |
+# | 9  | Camila Rodrigues  | 85739264101 | camila.rodrigues@siseus.com|
+# | 10 | Lucas Pereira     | 19283746502 | lucas.pereira@siseus.com   |
+#
+# ESTUDANTES:
+# | ID | Nome               | CPF         | Email                    |
+# |----|-------------------|-------------|--------------------------|
+# | 11 | Ana Beatriz Lima  | 77489284015 | ana.lima@siseus.com      |
+# | 12 | Bruno H. Castro   | 42294419081 | bruno.castro@siseus.com  |
+# | 13 | Carla D. Ferreira | 22812554096 | carla.ferreira@siseus.com|
+# | 14 | Daniel Martins    | 36925814702 | daniel.martins@siseus.com|
+# | 15 | Elena Ribeiro     | 74185296301 | elena.ribeiro@siseus.com |
+# | 16 | Fabio Gomes       | 95173846201 | fabio.gomes@siseus.com   |
+# | 17 | Gabriela Nunes    | 68427159302 | gabriela.nunes@siseus.com|
+# | 18 | Hugo Teixeira     | 31597428601 | hugo.teixeira@siseus.com |
+# | 19 | Isabela Moreira   | 52749618302 | isabela.moreira@siseus.com|
+# | 20 | João Victor Souza | 84629175301 | joao.souza@siseus.com    |
+# | 21 | Karina Lopes      | 17395824601 | karina.lopes@siseus.com  |
+# | 22 | Leonardo Barros   | 49572836102 | leonardo.barros@siseus.com|
+#
+# ═══════════════════════════════════════════════════════════════════════════
+# EVENTOS
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# | ID | Título                                | Código   | Status        | Avaliações        |
+# |----|---------------------------------------|----------|---------------|-------------------|
+# | 1  | Semana de Tecnologia 2024             | TECH24   | Passado       | Todas concluídas  |
+# | 2  | Encontro de IA                        | IA2025   | Em andamento  | Mistas            |
+# | 3  | Mostra de Projetos de Extensão        | MOSTRA25 | Futuro        | Pendentes         |
+# | 4  | Workshop de Desenvolvimento Web       | WEB2024  | Passado       | Todas concluídas  |
+# | 5  | Simpósio de Pesquisa Científica       | SIMP25   | Futuro        | Pendentes         |
+# | 6  | Hackathon de Soluções Sustentáveis    | HACK25   | Em andamento  | Em avaliação      |
+#
+# ═══════════════════════════════════════════════════════════════════════════
+# APRESENTAÇÕES (28 total)
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Evento Tech (ID 1) - IDs 1-5:
+#   1. ML na Saúde (3 avaliações concluídas)
+#   2. Blockchain Alimentar (2 avaliações concluídas)
+#   3. IoT Agricultura (2 avaliações concluídas)
+#   4. RA na Educação (2 avaliações concluídas)
+#   5. Chatbots (2 avaliações concluídas)
+#
+# Evento IA (ID 2) - IDs 6-11:
+#   6. CNN Diagnóstico (2 concluídas)
+#   7. PLN Português (1 em andamento, 1 concluída)
+#   8. Visão Computacional (1 em andamento, 1 concluída)
+#   9. IA Generativa (PENDENTE - sem avaliações)
+#   10. Sistemas Recomendação (1 em andamento)
+#   11. Ética em IA (1 concluída)
+#
+# Mostra (ID 3) - IDs 12-15: Todas PENDENTES
+# Workshop Web (ID 4) - IDs 16-18: Todas concluídas
+# Simpósio (ID 5) - IDs 19-24: Todas PENDENTES
+# Hackathon (ID 6) - IDs 25-28:
+#   25. Coleta Seletiva (1 em andamento, 1 concluída)
+#   26. Energia Solar (1 em andamento)
+#   27. Monitoramento Água (1 concluída)
+#   28. Marketplace Orgânicos (PENDENTE)
+#
+# ═══════════════════════════════════════════════════════════════════════════
+# AVALIAÇÕES (30 total)
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Estados:
+# - Concluídas: 22 avaliações
+# - Em andamento: 8 avaliações
+# - Pendentes: Várias apresentações sem avaliação iniciada
+#
+# ═══════════════════════════════════════════════════════════════════════════
+# ENUMS
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Campus: Fortaleza=0, Crateus=1
+# ETipoEvento: Nenhum=0, Pitch=1, Oral=2, Banner=3
+# EModalidadeApresentacao: Poster=0, Oral=1, Pitch=2, Artistica=3
+# ETipoUsuario: Estudante=1, Professor=2, Avaliador=3, Admin=4
+# EEstadoAvaliacao: Pendente=0, EmAvaliacao=1, Concluido=2
+#
+# ═══════════════════════════════════════════════════════════════════════════
+# COORDENADAS DE TESTE
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Crateús-CE:  Latitude: -5.184846  | Longitude: -40.651807
+# Fortaleza-CE: Latitude: -3.7436587 | Longitude: -38.5410718
+################################################################################

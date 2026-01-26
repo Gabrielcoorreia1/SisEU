@@ -6,55 +6,59 @@ using SisEUs.Domain.ContextoDeEvento.Interfaces;
 
 namespace SisEUs.Infrastructure.Repositorios
 {
-    public class EventoRepositorio : IEventoRepositorio
+    public class EventoRepositorio(AppDbContext context) : IEventoRepositorio
     {
-        private readonly AppDbContext _context;
-        public EventoRepositorio(AppDbContext context)
-        {
-            _context = context;
-        }
-
         public async Task CriarEventoAsync(Evento evento, CancellationToken cancellationToken = default)
         {
-            await _context.Sessoes.AddAsync(evento, cancellationToken);
+            await context.Eventos.AddAsync(evento, cancellationToken);
         }
 
         public async Task<Evento?> ObterEventoPorIdAsync(int eventoId, CancellationToken cancellationToken = default)
         {
-
-            return await _context.Sessoes
-                .Include(s => s.Apresentacoes)
+            return await context.Eventos
+                .Include(e => e.Apresentacoes)
                 .FirstOrDefaultAsync(e => e.Id == eventoId, cancellationToken);
         }
 
         public async Task<IEnumerable<Evento>> ObterEventosAsync()
         {
-
-            return await _context.Sessoes
-                .Include(s => s.Apresentacoes)
+            return await context.Eventos
+                .Include(e => e.Apresentacoes)
                 .ToListAsync();
         }
 
         public async Task<IEnumerable<Evento>> ObterEventosPaginadosAsync(int skip, int take, CancellationToken cancellationToken = default!)
         {
-            return await _context.Sessoes
-                .Include(s => s.Apresentacoes)
+            return await context.Eventos
                 .AsNoTracking()
-                .Skip((skip - 1) * take)
+                .OrderByDescending(e => e.DataInicio)
+                .Skip(skip)
                 .Take(take)
                 .ToListAsync(cancellationToken);
         }
 
         public void ExcluirEvento(Evento evento)
         {
-            _context.Sessoes.Remove(evento);
+            context.Eventos.Remove(evento);
         }
 
         public async Task<Evento?> ObterEventoPorCodigoAsync(string codigo, CancellationToken cancellationToken = default)
         {
-            return await _context.Sessoes
+            return await context.Eventos
                 .AsNoTracking()
                 .FirstOrDefaultAsync(e => e.CodigoUnico == codigo, cancellationToken);
+        }
+
+        public async Task<bool> CodigoUnicoJaExisteAsync(string codigoUnico, int? eventoIdExcluir = null, CancellationToken cancellationToken = default)
+        {
+            var query = context.Eventos.AsNoTracking().Where(e => e.CodigoUnico == codigoUnico);
+            
+            if (eventoIdExcluir.HasValue)
+            {
+                query = query.Where(e => e.Id != eventoIdExcluir.Value);
+            }
+
+            return await query.AnyAsync(cancellationToken);
         }
     }
 }

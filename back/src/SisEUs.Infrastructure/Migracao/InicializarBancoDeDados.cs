@@ -8,25 +8,23 @@ namespace SisEUs.Infrastructure.Migracao
     {
         public static async Task ApplyMigrationsAsync(this IApplicationBuilder app)
         {
-            using (var scope = app.ApplicationServices.CreateScope())
+            using var scope = app.ApplicationServices.CreateScope();
+            var serviceProvider = scope.ServiceProvider;
+            try
             {
-                var serviceProvider = scope.ServiceProvider;
-                try
-                {
-                    var dbContext = serviceProvider.GetRequiredService<AppDbContext>();
+                var dbContext = serviceProvider.GetRequiredService<AppDbContext>();
 
-                    dbContext.Database.EnsureCreated();
-                    await InitBD.SeedAsync(dbContext);
+                dbContext.Database.EnsureCreated();
+                await InitBD.SeedAsync(dbContext);
 
-                }
-                catch (Exception ex)
-                {
+            }
+            catch (Exception ex)
+            {
 
-                    Console.WriteLine("--- ERRO AO INICIAR O BANCO DE DADOS ---");
-                    Console.WriteLine(ex.Message);
-                    Console.WriteLine("----------------------------------");
-                    throw;
-                }
+                Console.WriteLine("--- ERRO AO INICIAR O BANCO DE DADOS ---");
+                Console.WriteLine(ex.Message);
+                Console.WriteLine("----------------------------------");
+                throw;
             }
         }
     }

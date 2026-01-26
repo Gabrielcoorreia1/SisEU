@@ -4,52 +4,76 @@ using SisEUs.Domain.ContextoDeEvento.Interfaces;
 
 namespace SisEUs.Infrastructure.Repositorios
 {
-    public class PresencaRepositorio : IPresencaRepositorio
+    public class PresencaRepositorio(AppDbContext dbContext) : IPresencaRepositorio
     {
-        private readonly AppDbContext _context;
-        public PresencaRepositorio(AppDbContext dbContext)
+        public Task<Presenca?> BuscarPorUsuarioEEventoAsync(int eventoId, int usuarioId, CancellationToken cancellationToken = default)
         {
-            _context = dbContext;
-        }
-        public async Task<Presenca?> BuscarPorUsuarioEEventoAsync(int eventoId, int usuarioId, CancellationToken cancellationToken = default)
-        {
-            return await _context.Presencas
+            return dbContext.Presencas
                 .FirstOrDefaultAsync(p => p.EventoId == eventoId && p.UsuarioId == usuarioId, cancellationToken);
         }
 
-        public async Task CriarPresenca(Presenca presenca, CancellationToken cancellationToken = default)
+        public void CriarPresenca(Presenca presenca, CancellationToken cancellationToken = default)
         {
-            await _context.Presencas.AddAsync(presenca, cancellationToken);
+            dbContext.Presencas.Add(presenca);
         }
 
-        public async Task<IEnumerable<Presenca>>? ObterPresencaDeUsuario(int usuarioId, CancellationToken cancellationToken = default)
+        public Task<IEnumerable<Presenca>>? ObterPresencaDeUsuario(int usuarioId, CancellationToken cancellationToken = default)
         {
-            return await _context.Presencas
-                .Where(p => p.UsuarioId == usuarioId)
-                .ToListAsync(cancellationToken);
+            return Task.FromResult<IEnumerable<Presenca>>(
+                dbContext.Presencas
+                    .AsNoTracking()
+                    .Where(p => p.UsuarioId == usuarioId)
+                    .ToList()
+            );
         }
 
-        public Task<Presenca?> ObterPresencaEventoEmAndamentoAsync(CancellationToken cancellationToken = default)
+        public Task<Presenca?> ObterPresencaEventoEmAndamentoAsync(int usuarioId, CancellationToken cancellationToken = default)
         {
-            return _context.Presencas
-                .FirstOrDefaultAsync(e => e.CheckInValido && !e.CheckOutValido, cancellationToken);
+            return dbContext.Presencas
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.UsuarioId == usuarioId && e.CheckInValido && !e.CheckOutValido, cancellationToken);
         }
 
-        public async Task<Presenca?> ObterPresencaPorIdAsync(int presencaId, CancellationToken cancellationToken = default)
+        public Task<Presenca?> ObterPresencaPorIdAsync(int presencaId, CancellationToken cancellationToken = default)
         {
-            return await _context.Presencas
-                .FirstOrDefaultAsync(p => p.Id == presencaId, cancellationToken);
+            return dbContext.Presencas.FindAsync(new object[] { presencaId }, cancellationToken).AsTask();
         }
 
+        [Obsolete("Use ObterPresencasPaginadas para evitar problemas de performance com grandes volumes de dados.")]
         public async Task<IEnumerable<Presenca>> ObterPresencas()
         {
-            return await _context.Presencas.ToListAsync();
+            return await dbContext.Presencas
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public Task<Presenca?> ObterStatusPresencaPorEvento(int eventoId, int usuarioId, CancellationToken cancellationToken = default)
         {
-            return _context.Presencas
+            return dbContext.Presencas
+                .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.EventoId == eventoId && p.UsuarioId == usuarioId, cancellationToken);
+        }
+
+        public async Task<IEnumerable<Presenca>> ObterPresencasPaginadas(int pagina, int tamanhoPagina, CancellationToken cancellationToken = default)
+        {
+            if (pagina <= 0) pagina = 1;
+            if (tamanhoPagina <= 0 || tamanhoPagina > 100) tamanhoPagina = 10;
+
+            return await dbContext.Presencas
+                .AsNoTracking()
+                .OrderByDescending(p => p.CheckIn)
+                .Skip((pagina - 1) * tamanhoPagina)
+                .Take(tamanhoPagina)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<IEnumerable<Presenca>> ObterPresencasPorEventoAsync(int eventoId, CancellationToken cancellationToken = default)
+        {
+            return await dbContext.Presencas
+                .AsNoTracking()
+                .Where(p => p.EventoId == eventoId)
+                .OrderByDescending(p => p.CheckIn)
+                .ToListAsync(cancellationToken);
         }
     }
 }

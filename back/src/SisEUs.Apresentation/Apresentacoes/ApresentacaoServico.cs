@@ -1,123 +1,193 @@
 ﻿using SisEUs.Application.Apresentacoes.Abstractions;
 using SisEUs.Application.Apresentacoes.DTOs.Respostas;
 using SisEUs.Application.Apresentacoes.DTOs.Solicitacoes;
-using SisEUs.Application.Apresentacoes.Mappers;
+using SisEUs.Application.Comum.Mapeamento;
 using SisEUs.Application.Comum.Resultados;
 using SisEUs.Application.Comum.UoW;
 using SisEUs.Domain.Comum.Excecoes;
 using SisEUs.Domain.ContextoDeEvento.Entidades;
 using SisEUs.Domain.ContextoDeEvento.Interfaces;
 using SisEUs.Domain.ContextoDeEvento.ObjetosDeValor;
-using SisEUs.Domain.ContextoDeUsuario.Interfaces;
-using SisEUs.Domain.ContextoDeUsuario.ObjetosDeValor;
+using Microsoft.Extensions.Logging;
 
 namespace SisEUs.Application.Apresentacoes
 {
-    public class ApresentacaoServico : IApresentacaoServico
+    public class ApresentacaoServico(
+        IEventoRepositorio eventoRepositorio,
+        IApresentacaoRepositorio apresentacaoRepositorio,
+        ILogger<ApresentacaoServico> logger,
+        IUoW uow,
+        IMapeadorDeEntidades mapeador) : IApresentacaoServico
     {
-        private readonly IEventoRepositorio _eventoRepositorio;
-        private readonly IUsuarioRepositorio _usuarioRepositorio;
-        private readonly IApresentacaoRepositorio _apresentacaoRepositorio;
-        private readonly IUoW _uow;
-
-        public ApresentacaoServico(IEventoRepositorio eventoRepositorio, IUsuarioRepositorio usuarioRepositorio, IApresentacaoRepositorio apresentacaoRepositorio, IUoW uow)
+        public async Task<Resultado<ApresentacaoResposta>> CriarApresentacaoAsync(CriarApresentacaoSolicitacao request, CancellationToken cancellationToken)
         {
-            _eventoRepositorio = eventoRepositorio;
-            _usuarioRepositorio = usuarioRepositorio;
-            _apresentacaoRepositorio = apresentacaoRepositorio;
-            _uow = uow;
+            logger.LogInformation("Criando apresentação: {Titulo} para evento {EventoId}", request.Titulo, request.EventoId);
+
+            var resultadoConstrucao = await AdicionarAoContextoAsync(request, cancellationToken);
+
+            if (!resultadoConstrucao.Sucesso)
+            {
+                var mensagemErro = resultadoConstrucao.Erros.FirstOrDefault() ?? "Erro desconhecido";
+                logger.LogWarning("Falha ao criar apresentação: {Titulo}. Erro: {Erro}", request.Titulo, mensagemErro);
+                return Resultado<ApresentacaoResposta>.Falha(resultadoConstrucao.TipoDeErro!.Value, mensagemErro);
+            }
+
+            await uow.CommitAsync(cancellationToken);
+
+            var novaApresentacao = resultadoConstrucao.Valor;
+            var dto = await mapeador.MapearApresentacaoAsync(novaApresentacao, cancellationToken);
+
+            logger.LogInformation("Apresentação {ApresentacaoId} criada com sucesso", novaApresentacao.Id);
+            return Resultado<ApresentacaoResposta>.Ok(dto);
         }
 
-        public async Task<Resultado<ApresentacaoResposta>> CriarApresentacaoAsync(CriarApresentacaoSolicitacao request, CancellationToken cancellationToken)
+        public async Task<Resultado<Apresentacao>> AdicionarAoContextoAsync(CriarApresentacaoSolicitacao request, CancellationToken cancellationToken)
         {
             try
             {
                 var titulo = Titulo.Criar(request.Titulo);
-                var nomeAutor = request.NomeAutor;
-                var nomeOrientador = request.NomeOrientador;
 
                 var novaApresentacao = Apresentacao.Criar(
                     request.EventoId,
                     titulo,
-                    nomeAutor,
-                    nomeOrientador
+                    request.NomeAutor,
+                    request.NomeOrientador,
+                    request.Modalidade
                 );
 
-                await _apresentacaoRepositorio.AdicionarAsync(novaApresentacao, cancellationToken);
+                await apresentacaoRepositorio.AdicionarAsync(novaApresentacao, cancellationToken);
 
-                await _uow.CommitAsync(cancellationToken);
-
-                var dto = await novaApresentacao.ToResponseDtoAsync(_eventoRepositorio, _usuarioRepositorio, cancellationToken);
-
-                return Resultado<ApresentacaoResposta>.Ok(dto);
+                return Resultado<Apresentacao>.Ok(novaApresentacao);
             }
             catch (ExcecaoDeDominio ex)
             {
-                return Resultado<ApresentacaoResposta>.Falha(TipoDeErro.Validacao, ex.Message);
+                logger.LogError(ex, "Erro de domínio ao adicionar apresentação ao contexto: {Titulo}", request.Titulo);
+                return Resultado<Apresentacao>.Falha(TipoDeErro.Validacao, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Erro inesperado ao adicionar apresentação ao contexto: {Titulo}", request.Titulo);
+                throw;
             }
         }
 
         public async Task<Resultado<ApresentacaoResposta>> ObterApresentacaoPorIdAsync(int apresentacaoId, CancellationToken cancellationToken)
         {
-            var apresentacao = await _apresentacaoRepositorio.ObterPorIdAsync(apresentacaoId, cancellationToken);
-            if (apresentacao is null)
-                return Resultado<ApresentacaoResposta>.Falha(TipoDeErro.NaoEncontrado, "Apresentação não encontrada.");
+            logger.LogInformation("Obtendo apresentação {ApresentacaoId}", apresentacaoId);
 
-            var dto = await apresentacao.ToResponseDtoAsync(_eventoRepositorio, _usuarioRepositorio, cancellationToken);
-            return Resultado<ApresentacaoResposta>.Ok(dto);
+            try
+            {
+                var apresentacao = await apresentacaoRepositorio.ObterPorIdAsync(apresentacaoId, cancellationToken);
+                if (apresentacao is null)
+                {
+                    logger.LogWarning("Apresentação {ApresentacaoId} não encontrada", apresentacaoId);
+                    return Resultado<ApresentacaoResposta>.Falha(TipoDeErro.NaoEncontrado, "Apresentação não encontrada.");
+                }
+
+                var dto = await mapeador.MapearApresentacaoAsync(apresentacao, cancellationToken);
+                return Resultado<ApresentacaoResposta>.Ok(dto);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Erro ao obter apresentação {ApresentacaoId}", apresentacaoId);
+                throw;
+            }
         }
 
         public async Task<Resultado<IEnumerable<ApresentacaoResposta>>> ObterApresentacoesPorEventoAsync(int eventoId, CancellationToken cancellationToken)
         {
-            var eventoExiste = await _eventoRepositorio.ObterEventoPorIdAsync(eventoId, cancellationToken) is not null;
-            if (!eventoExiste)
-                return Resultado<IEnumerable<ApresentacaoResposta>>.Falha(TipoDeErro.NaoEncontrado, "Evento não encontrado.");
+            logger.LogInformation("Obtendo apresentações do evento {EventoId}", eventoId);
 
-            var apresentacoes = await _apresentacaoRepositorio.ObterPorEventoIdAsync(eventoId, cancellationToken);
+            try
+            {
+                var eventoExiste = await eventoRepositorio.ObterEventoPorIdAsync(eventoId, cancellationToken) is not null;
+                if (!eventoExiste)
+                {
+                    logger.LogWarning("Evento {EventoId} não encontrado ao buscar apresentações", eventoId);
+                    return Resultado<IEnumerable<ApresentacaoResposta>>.Falha(TipoDeErro.NaoEncontrado, "Evento não encontrado.");
+                }
 
-            var dtosTasks = apresentacoes.Select(ap => ap.ToResponseDtoAsync(_eventoRepositorio, _usuarioRepositorio, cancellationToken));
-            var dtos = await Task.WhenAll(dtosTasks);
+                var apresentacoes = await apresentacaoRepositorio.ObterPorEventoIdAsync(eventoId, cancellationToken);
 
-            return Resultado<IEnumerable<ApresentacaoResposta>>.Ok(dtos);
+                if (!apresentacoes.Any())
+                {
+                    logger.LogInformation("Nenhuma apresentação encontrada para o evento {EventoId}", eventoId);
+                    return Resultado<IEnumerable<ApresentacaoResposta>>.Ok(Enumerable.Empty<ApresentacaoResposta>());
+                }
+
+                var dtos = new List<ApresentacaoResposta>();
+                foreach (var apresentacao in apresentacoes)
+                {
+                    var dto = await mapeador.MapearApresentacaoAsync(apresentacao, cancellationToken);
+                    dtos.Add(dto);
+                }
+
+                logger.LogInformation("Encontradas {Count} apresentações para o evento {EventoId}", dtos.Count, eventoId);
+                return Resultado<IEnumerable<ApresentacaoResposta>>.Ok(dtos);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Erro ao obter apresentações do evento {EventoId}", eventoId);
+                throw;
+            }
         }
 
         public async Task<Resultado> ExcluirApresentacaoAsync(int apresentacaoId, CancellationToken cancellationToken)
         {
-            var evento = await _eventoRepositorio.ObterEventoPorIdAsync(apresentacaoId, cancellationToken);
-            if (evento is null)
-                return Resultado.Falha(TipoDeErro.NaoEncontrado, "Evento não encontrado para a apresentação informada.");
+            logger.LogInformation("Excluindo apresentação {ApresentacaoId}", apresentacaoId);
 
-            var apresentacao = await _apresentacaoRepositorio.ObterPorIdAsync(apresentacaoId, cancellationToken);
-            if (apresentacao is null)
-                return Resultado.Falha(TipoDeErro.NaoEncontrado, "Apresentação não encontrada.");
+            try
+            {
+                var apresentacao = await apresentacaoRepositorio.ObterPorIdAsync(apresentacaoId, cancellationToken);
+                if (apresentacao is null)
+                {
+                    logger.LogWarning("Apresentação {ApresentacaoId} não encontrada para exclusão", apresentacaoId);
+                    return Resultado.Falha(TipoDeErro.NaoEncontrado, "Apresentação não encontrada.");
+                }
 
-            _apresentacaoRepositorio.Remover(apresentacao);
+                apresentacaoRepositorio.Remover(apresentacao);
+                await uow.CommitAsync(cancellationToken);
 
-            await _uow.CommitAsync(cancellationToken);
-
-
-            return Resultado.Ok();
+                logger.LogInformation("Apresentação {ApresentacaoId} excluída com sucesso", apresentacaoId);
+                return Resultado.Ok();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Erro ao excluir apresentação {ApresentacaoId}", apresentacaoId);
+                throw;
+            }
         }
 
         public async Task<Resultado> AtualizarApresentacaoAsync(int apresentacaoId, AtualizarApresentacaoSolicitacao request, CancellationToken cancellationToken)
         {
+            logger.LogInformation("Atualizando apresentação {ApresentacaoId}", apresentacaoId);
+
             try
             {
-                var apresentacao = await _apresentacaoRepositorio.ObterPorIdAsync(apresentacaoId, cancellationToken);
+                var apresentacao = await apresentacaoRepositorio.ObterPorIdAsync(apresentacaoId, cancellationToken);
                 if (apresentacao is null)
+                {
+                    logger.LogWarning("Apresentação {ApresentacaoId} não encontrada para atualização", apresentacaoId);
                     return Resultado.Falha(TipoDeErro.NaoEncontrado, "Apresentação não encontrada.");
+                }
 
                 var titulo = Titulo.Criar(request.Titulo);
-                var nomeAutor = request.NomeAutor;
-                var nomeOrientador = request.NomeOrientador;
-                apresentacao.Atualizar(titulo, nomeAutor, nomeOrientador);
+                apresentacao.Atualizar(titulo, request.NomeAutor, request.NomeOrientador);
 
-                await _uow.CommitAsync(cancellationToken);
+                await uow.CommitAsync(cancellationToken);
+                
+                logger.LogInformation("Apresentação {ApresentacaoId} atualizada com sucesso", apresentacaoId);
                 return Resultado.Ok();
             }
             catch (ExcecaoDeDominio ex)
             {
+                logger.LogError(ex, "Erro de domínio ao atualizar apresentação {ApresentacaoId}", apresentacaoId);
                 return Resultado.Falha(TipoDeErro.Validacao, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Erro inesperado ao atualizar apresentação {ApresentacaoId}", apresentacaoId);
+                throw;
             }
         }
     }

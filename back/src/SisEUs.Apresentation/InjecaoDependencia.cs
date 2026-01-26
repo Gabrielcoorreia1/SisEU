@@ -1,14 +1,19 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using SisEUs.Apresentation.Authenticacoes;
-using SisEUs.Apresentation.Authenticacoes.Abstractions;
-using SisEUs.Application.Apresentacoes.Abstractions;
 using SisEUs.Application.Apresentacoes;
-using SisEUs.Application.Eventos.Abstracoes;
+using SisEUs.Application.Apresentacoes.Abstractions;
+using SisEUs.Application.Authenticacoes;
+using SisEUs.Application.Authenticacoes.Abstractions;
+using SisEUs.Application.Avaliacoes;
+using SisEUs.Application.Avaliacoes.Abstracoes;
+using SisEUs.Application.Checkin;
+using SisEUs.Application.Checkin.Abstraction;
+using SisEUs.Application.Comum.Mapeamento;
+using SisEUs.Application.Comum.Servicos;
 using SisEUs.Application.Eventos;
-using SisEUs.Application.Presencas.Abstracoes;
+using SisEUs.Application.Eventos.Abstracoes;
 using SisEUs.Application.Presencas;
-using SisEUs.Apresentation.Checkin;
-using SisEUs.Apresentation.Checkin.Abstractions;
+using SisEUs.Application.Presencas.Abstracoes;
+using SisEUs.Domain.ContextoDeEvento.Servicos;
 
 namespace SisEUs.Application
 {
@@ -21,7 +26,15 @@ namespace SisEUs.Application
             services.AddScoped<IEventoServico, EventoServico>();
             services.AddScoped<IPresencaServico, PresencaServico>();
             services.AddScoped<IPinService, PinService>();
-            
+            services.AddScoped<IAvaliacaoServico, AvaliacaoServico>();
+
+            services.AddScoped<GeolocalizacaoValidador>();
+            services.AddScoped<IGeolocalizacaoValidador>(sp => sp.GetRequiredService<GeolocalizacaoValidador>());
+
+            services.AddScoped<IValidadorDeCoordenadas, ValidadorDeCoordenadas>();
+
+            services.AddScoped<IMapeadorDeEntidades, MapeadorDeEntidades>();
+
             return services;
         }
     }

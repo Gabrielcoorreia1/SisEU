@@ -1,5 +1,4 @@
 ﻿using SisEUs.Domain.Comum.Excecoes;
-using System;
 
 namespace SisEUs.Domain.ContextoDeUsuario.Excecoes
 {

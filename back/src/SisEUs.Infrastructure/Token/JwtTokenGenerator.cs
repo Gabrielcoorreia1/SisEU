@@ -1,38 +1,33 @@
 ﻿using Microsoft.IdentityModel.Tokens;
+using SisEUs.Domain.Comum.Token;
+using SisEUs.Domain.ContextoDeUsuario.Entidades;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System;
-using System.Collections.Generic;
-using SisEUs.Domain.Comum.Token;
-using SisEUs.Domain.ContextoDeUsuario.Entidades;
 
 namespace SisEUs.Infrastructure.Token
 {
-    public class JwtTokenGenerator : IAccessTokenGenerator
+    public class JwtTokenGenerator(uint expirationTimeMinutes, string signinKey) : IAccessTokenGenerator
     {
-        private readonly uint _expirationTimeMinutes;
-        private readonly string _signinKey;
-
-        public JwtTokenGenerator(uint expirationTimeMinutes, string signinKey)
-        {
-            _expirationTimeMinutes = expirationTimeMinutes;
-            _signinKey = signinKey;
-        }
-
         public string Generate(Usuario usuario)
         {
             var claims = new List<Claim>()
             {
-                new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
-                new Claim(ClaimTypes.Sid, usuario.UserIdentifier.ToString())
+                new(JwtRegisteredClaimNames.Sub, usuario.UserIdentifier.ToString()),
+                new(ClaimTypes.Sid, usuario.UserIdentifier.ToString()),
+                new(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new(JwtRegisteredClaimNames.Email, usuario.Email.Valor),
+                new(ClaimTypes.Role, usuario.EUserType.ToString()),
+                new("role", usuario.EUserType.ToString()),
+                new("nome", usuario.Nome.ToString())
             };
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddMinutes(_expirationTimeMinutes),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_signinKey)), SecurityAlgorithms.HmacSha256Signature)
+                Expires = DateTime.UtcNow.AddMinutes(expirationTimeMinutes),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signinKey)), SecurityAlgorithms.HmacSha256Signature)
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();

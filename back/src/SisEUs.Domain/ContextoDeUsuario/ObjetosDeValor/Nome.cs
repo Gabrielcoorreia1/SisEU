@@ -13,8 +13,8 @@ namespace SisEUs.Domain.ContextoDeUsuario.ObjetosDeValor
             Nome = nome;
             Sobrenome = sobrenome;
         }
-        public string Nome { get; }
-        public string Sobrenome { get; }
+        public string Nome { get; } = null!;
+        public string Sobrenome { get; } = null!;
 
         public static NomeCompleto Criar(string nome, string sobrenome)
         {

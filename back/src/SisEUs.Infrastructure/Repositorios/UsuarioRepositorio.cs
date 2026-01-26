@@ -2,32 +2,28 @@
 using SisEUs.Domain.ContextoDeUsuario.Entidades;
 using SisEUs.Domain.ContextoDeUsuario.Interfaces;
 using SisEUs.Domain.ContextoDeUsuario.ObjetosDeValor;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using System; // Adicionado para Guid
 
 namespace SisEUs.Infrastructure.Repositorios
 {
-    public class UsuarioRepositorio : IUsuarioRepositorio
+    public class UsuarioRepositorio(AppDbContext context) : IUsuarioRepositorio
     {
-        private readonly AppDbContext _context;
-
-        public UsuarioRepositorio(AppDbContext context)
-        {
-            _context = context;
-        }
+        private readonly AppDbContext _context = context;
 
         public async Task AdicionarAsync(Usuario usuario, CancellationToken cancellationToken = default)
         {
             await _context.Usuarios.AddAsync(usuario, cancellationToken);
         }
 
+        public void Atualizar(Usuario usuario)
+        {
+            _context.Usuarios.Update(usuario);
+        }
+
         public async Task<bool> CpfJaExisteAsync(Cpf cpf, CancellationToken cancellationToken = default)
         {
             return await _context.Usuarios.AnyAsync(u => u.Cpf == cpf, cancellationToken);
         }
+        
         public async Task<Usuario?> ObterPorCpfAsync(Cpf cpf, CancellationToken cancellationToken = default)
         {
             return await _context.Usuarios.FirstOrDefaultAsync(u => u.Cpf == cpf, cancellationToken);
@@ -50,8 +46,9 @@ namespace SisEUs.Infrastructure.Repositorios
 
         public Task<IEnumerable<Usuario>> ObterPorIdsAsync(IEnumerable<int> ids, CancellationToken cancellationToken = default)
         {
+            var lista = ids.ToList();
             return _context.Usuarios
-                .Where(u => ids.Contains(u.Id))
+                .Where(u => lista.Contains(u.Id))
                 .ToListAsync(cancellationToken)
                 .ContinueWith(task => task.Result.AsEnumerable(), cancellationToken);
         }
@@ -62,8 +59,8 @@ namespace SisEUs.Infrastructure.Repositorios
 
             return await _context.Usuarios
                 .AsNoTracking()
-                .Where(u => u.Nome.Nome.ToLower().Contains(termoBusca) || 
-                u.Nome.Sobrenome.ToLower().Contains(termoBusca) && 
+                .Where(u => u.Nome.Nome.ToLower().Contains(termoBusca) ||
+                u.Nome.Sobrenome.ToLower().Contains(termoBusca) &&
                 u.EUserType == Domain.ContextoDeUsuario.Enumeracoes.ETipoUsuario.Professor)
                 .ToListAsync(cancellationToken);
         }
@@ -72,6 +69,7 @@ namespace SisEUs.Infrastructure.Repositorios
         {
             return await _context.Usuarios.AsNoTracking().ToListAsync();
         }
+        
         public async Task<Usuario?> ObterPorUserIdentifierAsync(Guid userIdentifier, CancellationToken cancellationToken = default)
         {
             return await _context.Usuarios

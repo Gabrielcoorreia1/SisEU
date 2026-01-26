@@ -1,8 +1,10 @@
 ﻿namespace SisEUs.Application.Presencas.DTOs.Respostas
 {
-    public class StatusPresencaResposta
-    {
-        public bool CheckInEfetuado { get; set; }
-        public bool CheckOutEfetuado { get; set; }
-    }
+    /// <summary>
+    /// DTO para representar o status de presença (check-in/check-out).
+    /// </summary>
+    public record StatusPresencaResposta(
+        bool CheckInEfetuado,
+        bool CheckOutEfetuado
+    );
 }
