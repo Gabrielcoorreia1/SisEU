@@ -8,19 +8,11 @@ using System.Security.Claims;
 
 namespace SisEUs.Infrastructure.LoggedUser
 {
-    public class LoggedUser : ILoggedUser
+    public class LoggedUser(AppDbContext context, ITokenProvider tokenProvider) : ILoggedUser
     {
-        private readonly AppDbContext _context;
-        private readonly ITokenProvider _tokenProvider;
-
-        public LoggedUser(AppDbContext context, ITokenProvider tokenProvider)
-        {
-            _context = context;
-            _tokenProvider = tokenProvider;
-        }
         public async Task<Usuario> User()
         {
-            var token = _tokenProvider.Value();
+            var token = tokenProvider.Value();
 
             var tokenHandler = new JwtSecurityTokenHandler();
 
@@ -30,7 +22,7 @@ namespace SisEUs.Infrastructure.LoggedUser
 
             var userIdentifier = Guid.Parse(identifier);
 
-            return await _context
+            return await context
                 .Usuarios
                 .AsNoTracking()
                 .FirstAsync(user => user.UserIdentifier == userIdentifier);

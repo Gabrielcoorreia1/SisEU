@@ -1,111 +1,152 @@
-﻿using SisEUs.Apresentation.Authenticacoes.Abstractions;
-using SisEUs.Apresentation.Authenticacoes.DTOs.Resposta;
-using SisEUs.Apresentation.Authenticacoes.DTOs.Solicitacoes;
+﻿using SisEUs.Application.Authenticacoes.Abstractions;
+using SisEUs.Application.Authenticacoes.DTOs.Resposta;
+using SisEUs.Application.Authenticacoes.DTOs.Solicitacoes;
+using SisEUs.Application.Comum.DTOs;
 using SisEUs.Application.Comum.Resultados;
 using SisEUs.Application.Comum.UoW;
+using SisEUs.Application.Eventos.DTOs.Resposta;
 using SisEUs.Domain.Comum.Excecoes;
 using SisEUs.Domain.Comum.Token;
 using SisEUs.Domain.ContextoDeUsuario.Entidades;
 using SisEUs.Domain.ContextoDeUsuario.Interfaces;
 using SisEUs.Domain.ContextoDeUsuario.ObjetosDeValor;
 using BCryptNet = BCrypt.Net.BCrypt;
-using System.Threading;
-using System.Threading.Tasks;
-using SisEUs.Application.Eventos.DTOs.Resposta;
-using SisEUs.Application.Presencas.DTOs.Respostas;
-using System.Linq;
-using System.Collections.Generic;
-using SisEUs.Domain.ContextoDeUsuario.Enumeracoes;
-using System; // Necessário para Console
 
-namespace SisEUs.Apresentation.Authenticacoes
+namespace SisEUs.Application.Authenticacoes
 {
-    public class AuthService : IAuthService
+    public class AuthService(
+        IUsuarioRepositorio usuarioRepositorio,
+        IAccessTokenGenerator tokenGenerator,
+        IUoW uow) : IAuthService
     {
-        private readonly IUsuarioRepositorio _usuarioRepositorio;
-        private readonly IAccessTokenGenerator _tokenGenerator;
-        private readonly IUoW _uow;
-
-        public AuthService(IUsuarioRepositorio usuarioRepositorio, IAccessTokenGenerator tokenGenerator, IUoW uow)
-        {
-            _usuarioRepositorio = usuarioRepositorio;
-            _tokenGenerator = tokenGenerator;
-            _uow = uow;
-        }
-
         public async Task<Resultado<LoginResposta>> LogarAsync(LogarSolicitacao request, CancellationToken cancellationToken)
         {
             try
             {
-                Console.WriteLine($"[LOGIN DEBUG] 1. Iniciando Login. CPF Recebido: '{request.Cpf}'");
-                
-                // Cria o VO do CPF
                 var cpf = Cpf.Criar(request.Cpf);
-                Console.WriteLine($"[LOGIN DEBUG] 2. VO CPF Criado: '{cpf.Valor}'");
 
-                // Busca no Banco
-                var usuario = await _usuarioRepositorio.ObterPorCpfAsync(cpf, cancellationToken);
-                
+                var usuario = await usuarioRepositorio.ObterPorCpfAsync(cpf, cancellationToken);
+
                 if (usuario is null)
                 {
-                    Console.WriteLine("[LOGIN DEBUG] FALHA: Usuário retornou NULO do banco de dados.");
                     return Resultado<LoginResposta>.Falha(TipoDeErro.NaoEncontrado, "Usuário não encontrado.");
                 }
 
-                Console.WriteLine($"[LOGIN DEBUG] 3. Usuário encontrado: {usuario.Nome}");
-                Console.WriteLine($"[LOGIN DEBUG] 4. Hash no Banco: '{usuario.Senha.Valor}'");
-                Console.WriteLine($"[LOGIN DEBUG] 5. Senha Recebida: '{request.Senha}'");
-
-                // Verifica a Senha
                 var senhaValida = BCryptNet.Verify(request.Senha, usuario.Senha.Valor);
-                Console.WriteLine($"[LOGIN DEBUG] 6. Resultado da Verificação de Senha: {senhaValida}");
 
                 if (!senhaValida)
                 {
-                    Console.WriteLine("[LOGIN DEBUG] FALHA: A senha não corresponde ao hash.");
-                    return Resultado<LoginResposta>.Falha(TipoDeErro.NaoEncontrado, "Senha incorreta.");
+                    return Resultado<LoginResposta>.Falha(TipoDeErro.Validacao, "Senha incorreta.");
                 }
 
-                // Gera Token
-                var token = _tokenGenerator.Generate(usuario);
-                Console.WriteLine("[LOGIN DEBUG] 7. Token gerado com sucesso.");
+                var token = tokenGenerator.Generate(usuario);
 
                 return Resultado<LoginResposta>.Ok(new LoginResposta
-                {
-                    Token = token,
-                    TipoUsuario = usuario.EUserType,
-                    UsuarioId = usuario.Id,
-                    NomeCompleto = usuario.Nome.ToString(),
-                    Cpf = usuario.Cpf.ToString()
-                });
+                (
+                    token,
+                    usuario.EUserType,
+                    usuario.Nome.ToString(),
+                    usuario.Cpf.ToString(),
+                    usuario.Id
+                ));
+            }
+            catch (ExcecaoDeDominio ex)
+            {
+                return Resultado<LoginResposta>.Falha(TipoDeErro.Validacao, ex.Message);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[LOGIN DEBUG] EXCEÇÃO FATAL: {ex.Message}");
-                Console.WriteLine(ex.StackTrace);
                 return Resultado<LoginResposta>.Falha(TipoDeErro.Validacao, ex.Message);
             }
         }
 
-        // ... (Mantenha os outros métodos RegistrarAsync, BuscarPorNome..., etc., iguais ao anterior)
-        public async Task<Resultado<LoginResposta>> RegistrarAsync(RegistrarSolicitacao request, CancellationToken cancellationToken)
+        public async Task<Resultado<UsuarioResposta>> RegistrarAsync(RegistrarSolicitacao request, CancellationToken cancellationToken)
         {
-            // ... (código anterior mantido) ...
-             return Resultado<LoginResposta>.Ok(new LoginResposta()); // Placeholder para compilar, use o código completo anterior se precisar registrar
+            try
+            {
+                var cpf = Cpf.Criar(request.Cpf);
+                var email = Email.Criar(request.Email);
+
+                if (await usuarioRepositorio.CpfJaExisteAsync(cpf, cancellationToken))
+                {
+                    return Resultado<UsuarioResposta>.Falha(TipoDeErro.Conflito, "CPF já cadastrado no sistema.");
+                }
+
+                if (await usuarioRepositorio.EmailJaExisteAsync(email, cancellationToken))
+                {
+                    return Resultado<UsuarioResposta>.Falha(TipoDeErro.Conflito, "Email já cadastrado no sistema.");
+                }
+
+                var nome = NomeCompleto.Criar(request.PrimeiroNome, request.Sobrenome);
+                var senhaHash = BCryptNet.HashPassword(request.Senha);
+                var senha = Senha.Criar(senhaHash);
+
+                var usuario = Usuario.CriarEstudante(nome, cpf, email, senha);
+
+                await usuarioRepositorio.AdicionarAsync(usuario, cancellationToken);
+                await uow.CommitAsync(cancellationToken);
+
+                return Resultado<UsuarioResposta>.Ok(new UsuarioResposta(
+                    Id: usuario.Id,
+                    NomeCompleto: $"{usuario.Nome.Nome} {usuario.Nome.Sobrenome}",
+                    Cpf: usuario.Cpf.Valor,
+                    Email: usuario.Email.Valor
+                ));
+            }
+            catch (ExcecaoDeDominio ex)
+            {
+                return Resultado<UsuarioResposta>.Falha(TipoDeErro.Validacao, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return Resultado<UsuarioResposta>.Falha(TipoDeErro.Inesperado, $"Erro inesperado ao registrar usuário: {ex.Message}");
+            }
         }
+
         public async Task<Resultado<BuscarUsuariosResposta>> BuscarPorNomeProfessorAsync(string nome, CancellationToken cancellationToken)
         {
-            var usuarios = await _usuarioRepositorio.BuscarPorNomeProfessorAsync(nome, cancellationToken);
-            return Resultado<BuscarUsuariosResposta>.Ok(new BuscarUsuariosResposta());
+            if (string.IsNullOrWhiteSpace(nome))
+            {
+                return Resultado<BuscarUsuariosResposta>.Falha(TipoDeErro.Validacao, "Nome não pode ser vazio.");
+            }
+
+            var usuarios = await usuarioRepositorio.BuscarPorNomeProfessorAsync(nome, cancellationToken);
+
+            if (usuarios == null || !usuarios.Any())
+            {
+                return Resultado<BuscarUsuariosResposta>.Falha(TipoDeErro.NaoEncontrado, "Nenhum professor encontrado com esse nome.");
+            }
+
+            var usuariosResposta = usuarios.Select(u => new UsuarioResposta(
+                Id: u.Id,
+                NomeCompleto: $"{u.Nome.Nome} {u.Nome.Sobrenome}",
+                Cpf: u.Cpf.Valor,
+                Email: u.Email.Valor
+            )).ToList();
+
+            return Resultado<BuscarUsuariosResposta>.Ok(new BuscarUsuariosResposta(usuariosResposta));
         }
+
         public async Task<Resultado<UsuarioResposta>> BuscarPorIdAsync(int id, CancellationToken cancellationToken)
         {
-            var usuario = await _usuarioRepositorio.ObterPorIdAsync(id, cancellationToken);
-            return Resultado<UsuarioResposta>.Ok(new UsuarioResposta());
-        }
-        public async Task<Resultado> TornarProfessorAsync(int id, CancellationToken cancellationToken)
-        {
-             return Resultado.Ok();
+            if (id <= 0)
+            {
+                return Resultado<UsuarioResposta>.Falha(TipoDeErro.Validacao, "ID inválido.");
+            }
+
+            var usuario = await usuarioRepositorio.ObterPorIdAsync(id, cancellationToken);
+
+            if (usuario is null)
+            {
+                return Resultado<UsuarioResposta>.Falha(TipoDeErro.NaoEncontrado, "Usuário não encontrado.");
+            }
+
+            return Resultado<UsuarioResposta>.Ok(new UsuarioResposta(
+                Id: usuario.Id,
+                NomeCompleto: $"{usuario.Nome.Nome} {usuario.Nome.Sobrenome}",
+                Cpf: usuario.Cpf.Valor,
+                Email: usuario.Email.Valor
+            ));
         }
     }
 }

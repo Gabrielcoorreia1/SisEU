@@ -3,16 +3,10 @@ using SisEUs.Infrastructure.Repositorios;
 
 namespace SisEUs.Infrastructure.Servicos;
 
-public class UoW : IUoW
+public class UoW(AppDbContext context) : IUoW
 {
-    private readonly AppDbContext _context;
-    public UoW(AppDbContext contexto)
-    {
-        _context = contexto;
-    }
-
     public async Task CommitAsync(CancellationToken cancellationToken = default!)
     {
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
     }
 }

@@ -17,6 +17,14 @@ namespace SisEUs.Infrastructure.Configuracoes
             builder.Property(p => p.CheckIn);
             builder.Property(p => p.CheckOut);
 
+            builder.Property(p => p.CheckInValido)
+                .IsRequired()
+                .HasDefaultValue(false);
+
+            builder.Property(p => p.CheckOutValido)
+                .IsRequired()
+                .HasDefaultValue(false);
+
             builder.OwnsOne(p => p.Localizacao, localBuilder =>
             {
                 localBuilder.Property(l => l.Latitude).HasColumnName("LocalizacaoLatitude").IsRequired();

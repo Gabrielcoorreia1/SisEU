@@ -1,6 +1,4 @@
 using SisEUs.Domain.Checkin.Entidades;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 
 namespace SisEUs.Domain.Checkin.Interfaces
 {

@@ -21,13 +21,13 @@ namespace SisEUs.Application.Apresentacoes.Mappers
                 : null;
 
             return new ApresentacaoResposta
-            {
-                Id = apresentacao.Id,
-                Evento = eventoDto,
-                Titulo = apresentacao.Titulo.Valor,
-                NomeAutor = apresentacao.NomeAutor,
-                NomeOrientador = apresentacao.NomeOrientador
-            };
+            (
+                apresentacao.Id,
+                eventoDto!,
+                apresentacao.Titulo.Valor,
+                apresentacao.NomeAutor,
+                apresentacao.NomeOrientador
+            );
         }
     }
 }

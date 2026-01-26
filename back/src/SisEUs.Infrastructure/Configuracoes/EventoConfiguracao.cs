@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SisEUs.Domain.ContextoDeEvento.Entidades;
 using SisEUs.Domain.ContextoDeEvento.ObjetosDeValor;
-using SisEUs.Domain.ContextoDeUsuario.ObjetosDeValor;
 
 namespace SisEUs.Infrastructure.Configuracoes
 {
@@ -54,7 +53,14 @@ namespace SisEUs.Infrastructure.Configuracoes
                 localBuilder.Property(l => l.Longitude).HasColumnName("LocalizacaoLongitude").IsRequired();
             });
 
-            builder.Property(e => e.Participantes);
+            builder.Property(e => e.ParticipantesIds)
+                .HasColumnName("Participantes")
+                .HasConversion(
+                    v => string.Join(',', v),
+                    v => string.IsNullOrWhiteSpace(v) ? new List<int>() : v.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(int.Parse)
+                        .ToList()
+                );
 
             builder.Property(e => e.ImgUrl)
                    .HasMaxLength(500);
@@ -69,9 +75,14 @@ namespace SisEUs.Infrastructure.Configuracoes
                 .HasConversion<string>()
                 .IsRequired();
 
-            builder.Property(e => e.Avaliadores);
-                
-                   
+            builder.Property(e => e.AvaliadoresIds)
+                .HasColumnName("Avaliadores")
+                .HasConversion(
+                    v => string.Join(',', v),
+                    v => string.IsNullOrWhiteSpace(v) ? new List<int>() : v.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(int.Parse)
+                        .ToList()
+                );
         }
     }
 }

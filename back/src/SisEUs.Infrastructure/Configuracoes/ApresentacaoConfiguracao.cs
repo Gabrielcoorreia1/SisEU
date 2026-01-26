@@ -9,10 +9,9 @@ namespace SisEUs.Infrastructure.Configuracoes
     {
         public void Configure(EntityTypeBuilder<Apresentacao> builder)
         {
-            builder.ToTable("Apresentacoes");
+            builder.ToTable("Eventos"); // Nome correto
             builder.HasKey(a => a.Id);
 
-            // Mapeamento único e explícito da FK
             builder.Property(a => a.EventoId).IsRequired();
             builder.HasOne(a => a.Evento)
                    .WithMany(e => e.Apresentacoes)

@@ -15,34 +15,36 @@ namespace SisEUs.Infrastructure.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.18");
+            modelBuilder
+                .HasAnnotation("ProductVersion", "8.0.18")
+                .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("SisEUs.Domain.Checkin.Entidades.Checkin", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime>("DataHoraCheckIn")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime?>("DataHoraCheckOut")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<double>("Latitude")
-                        .HasColumnType("REAL");
+                        .HasColumnType("double");
 
                     b.Property<double>("Longitude")
-                        .HasColumnType("REAL");
+                        .HasColumnType("double");
 
                     b.Property<int>("PinId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("UsuarioId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -53,20 +55,20 @@ namespace SisEUs.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime>("DataGeracao")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<bool>("IsAtivo")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Pin")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -77,82 +79,133 @@ namespace SisEUs.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<int>("EventoId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    b.Property<int>("Modalidade")
+                        .HasColumnType("int");
 
                     b.Property<string>("NomeAutor")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("NomeOrientador")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Titulo")
                         .IsRequired()
                         .HasMaxLength(300)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("varchar(300)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EventoId");
+                    b.HasIndex("EventoId")
+                        .HasDatabaseName("IX_Apresentacoes_EventoId");
 
-                    b.ToTable("Apresentacoes", (string)null);
+                    b.ToTable("Eventos", (string)null);
+                });
+
+            modelBuilder.Entity("SisEUs.Domain.ContextoDeEvento.Entidades.Avaliacao", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("ApresentacaoId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AvaliadorId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("DataConclusao")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("DataInicio")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<decimal?>("Nota")
+                        .HasPrecision(4, 2)
+                        .HasColumnType("decimal(4,2)");
+
+                    b.Property<string>("Parecer")
+                        .HasMaxLength(2000)
+                        .HasColumnType("varchar(2000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex(new[] { "ApresentacaoId", "AvaliadorId" }, "IX_Avaliacoes_Apresentacao_Avaliador")
+                        .IsUnique();
+
+                    b.ToTable("Avaliacoes", (string)null);
                 });
 
             modelBuilder.Entity("SisEUs.Domain.ContextoDeEvento.Entidades.Evento", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
-                    b.Property<string>("Avaliadores")
+                    b.Property<string>("AvaliadoresIds")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("longtext")
+                        .HasColumnName("Avaliadores");
 
                     b.Property<string>("CodigoUnico")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("varchar(50)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime>("DataFim")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime>("DataInicio")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("ImgUrl")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("varchar(500)");
 
-                    b.Property<string>("Participantes")
+                    b.Property<string>("ParticipantesIds")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("longtext")
+                        .HasColumnName("Participantes");
 
                     b.Property<string>("PinCheckin")
                         .HasMaxLength(10)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("varchar(10)");
 
                     b.Property<string>("TipoEvento")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Titulo")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("varchar(100)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CodigoUnico")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("IX_Eventos_CodigoUnico");
+
+                    b.HasIndex("DataInicio")
+                        .HasDatabaseName("IX_Eventos_DataInicio");
 
                     b.ToTable("Sessao", (string)null);
                 });
@@ -161,24 +214,47 @@ namespace SisEUs.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("CheckIn")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("CheckInValido")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
 
                     b.Property<DateTime?>("CheckOut")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("CheckOutValido")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<int>("EventoId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("UsuarioId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CheckIn")
+                        .HasDatabaseName("IX_Presencas_CheckIn");
+
+                    b.HasIndex("UsuarioId")
+                        .HasDatabaseName("IX_Presencas_Usuario");
+
+                    b.HasIndex("CheckInValido", "CheckOutValido")
+                        .HasDatabaseName("IX_Presencas_Status");
+
+                    b.HasIndex("EventoId", "UsuarioId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Presencas_Evento_Usuario");
 
                     b.HasIndex("UsuarioId", "EventoId")
                         .IsUnique();
@@ -190,40 +266,43 @@ namespace SisEUs.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<string>("Cpf")
                         .IsRequired()
                         .HasMaxLength(11)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("varchar(11)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("EUserType")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Matricula")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Senha")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("longtext");
 
                     b.Property<Guid>("UserIdentifier")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("char(36)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Cpf")
                         .IsUnique();
+
+                    b.HasIndex("EUserType")
+                        .HasDatabaseName("IX_Usuarios_Tipo");
 
                     b.HasIndex("Email")
                         .IsUnique();
@@ -242,21 +321,32 @@ namespace SisEUs.Infrastructure.Migrations
                     b.Navigation("Evento");
                 });
 
+            modelBuilder.Entity("SisEUs.Domain.ContextoDeEvento.Entidades.Avaliacao", b =>
+                {
+                    b.HasOne("SisEUs.Domain.ContextoDeEvento.Entidades.Apresentacao", "Apresentacao")
+                        .WithMany()
+                        .HasForeignKey("ApresentacaoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Apresentacao");
+                });
+
             modelBuilder.Entity("SisEUs.Domain.ContextoDeEvento.Entidades.Evento", b =>
                 {
                     b.OwnsOne("SisEUs.Domain.ContextoDeEvento.ObjetosDeValor.Localizacao", "Localizacao", b1 =>
                         {
                             b1.Property<int>("EventoId")
-                                .HasColumnType("INTEGER");
+                                .HasColumnType("int");
 
                             b1.Property<string>("Latitude")
                                 .IsRequired()
-                                .HasColumnType("TEXT")
+                                .HasColumnType("longtext")
                                 .HasColumnName("LocalizacaoLatitude");
 
                             b1.Property<string>("Longitude")
                                 .IsRequired()
-                                .HasColumnType("TEXT")
+                                .HasColumnType("longtext")
                                 .HasColumnName("LocalizacaoLongitude");
 
                             b1.HasKey("EventoId");
@@ -270,30 +360,30 @@ namespace SisEUs.Infrastructure.Migrations
                     b.OwnsOne("SisEUs.Domain.ContextoDeEvento.ObjetosDeValor.Local", "Local", b1 =>
                         {
                             b1.Property<int>("EventoId")
-                                .HasColumnType("INTEGER");
+                                .HasColumnType("int");
 
                             b1.Property<string>("Bloco")
                                 .IsRequired()
                                 .HasMaxLength(100)
-                                .HasColumnType("TEXT")
+                                .HasColumnType("varchar(100)")
                                 .HasColumnName("LocalBloco");
 
                             b1.Property<string>("Campus")
                                 .IsRequired()
                                 .HasMaxLength(100)
-                                .HasColumnType("TEXT")
+                                .HasColumnType("varchar(100)")
                                 .HasColumnName("LocalCampus");
 
                             b1.Property<string>("Departamento")
                                 .IsRequired()
                                 .HasMaxLength(100)
-                                .HasColumnType("TEXT")
+                                .HasColumnType("varchar(100)")
                                 .HasColumnName("LocalDepartamento");
 
                             b1.Property<string>("Sala")
                                 .IsRequired()
                                 .HasMaxLength(100)
-                                .HasColumnType("TEXT")
+                                .HasColumnType("varchar(100)")
                                 .HasColumnName("LocalSala");
 
                             b1.HasKey("EventoId");
@@ -316,16 +406,16 @@ namespace SisEUs.Infrastructure.Migrations
                     b.OwnsOne("SisEUs.Domain.ContextoDeEvento.ObjetosDeValor.Localizacao", "Localizacao", b1 =>
                         {
                             b1.Property<int>("PresencaId")
-                                .HasColumnType("INTEGER");
+                                .HasColumnType("int");
 
                             b1.Property<string>("Latitude")
                                 .IsRequired()
-                                .HasColumnType("TEXT")
+                                .HasColumnType("longtext")
                                 .HasColumnName("LocalizacaoLatitude");
 
                             b1.Property<string>("Longitude")
                                 .IsRequired()
-                                .HasColumnType("TEXT")
+                                .HasColumnType("longtext")
                                 .HasColumnName("LocalizacaoLongitude");
 
                             b1.HasKey("PresencaId");
@@ -345,16 +435,16 @@ namespace SisEUs.Infrastructure.Migrations
                     b.OwnsOne("SisEUs.Domain.ContextoDeUsuario.ObjetosDeValor.NomeCompleto", "Nome", b1 =>
                         {
                             b1.Property<int>("UsuarioId")
-                                .HasColumnType("INTEGER");
+                                .HasColumnType("int");
 
                             b1.Property<string>("Nome")
                                 .IsRequired()
-                                .HasColumnType("TEXT")
+                                .HasColumnType("longtext")
                                 .HasColumnName("Nome");
 
                             b1.Property<string>("Sobrenome")
                                 .IsRequired()
-                                .HasColumnType("TEXT")
+                                .HasColumnType("longtext")
                                 .HasColumnName("Sobrenome");
 
                             b1.HasKey("UsuarioId");

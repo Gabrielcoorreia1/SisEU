@@ -1,17 +1,14 @@
 ﻿using SisEUs.Domain.Comum.Sementes;
 using SisEUs.Domain.ContextoDeUsuario.Enumeracoes;
-using SisEUs.Domain.ContextoDeUsuario.ObjetosDeValor;
-using System;
-using System.Collections.Generic;
-using SisEUs.Domain.Comum.Excecoes; 
 using SisEUs.Domain.ContextoDeUsuario.Excecoes;
+using SisEUs.Domain.ContextoDeUsuario.ObjetosDeValor;
 
 namespace SisEUs.Domain.ContextoDeUsuario.Entidades
 {
     public class Usuario : Entidade
     {
         private Usuario() { }
-    
+
         public NomeCompleto Nome { get; private set; } = null!;
         public Cpf Cpf { get; private set; } = null!;
         public Email Email { get; private set; } = null!;
@@ -34,7 +31,20 @@ namespace SisEUs.Domain.ContextoDeUsuario.Entidades
             };
             return usuario;
         }
-                public static Usuario CriarAdmin(NomeCompleto nome, Cpf cpf, Email email, Senha senha)
+        public static Usuario CriarProfessor(NomeCompleto nome, Cpf cpf, Email email, Senha senha, string? matricula = null)
+        {
+            return new Usuario
+            {
+                Nome = nome,
+                Cpf = cpf,
+                Email = email,
+                Senha = senha,
+                EUserType = ETipoUsuario.Professor,
+                UserIdentifier = Guid.NewGuid(),
+                Matricula = matricula
+            };
+        }
+        public static Usuario CriarAdmin(NomeCompleto nome, Cpf cpf, Email email, Senha senha)
         {
             var usuario = new Usuario
             {
@@ -52,8 +62,8 @@ namespace SisEUs.Domain.ContextoDeUsuario.Entidades
         public void TornarProfessor()
         {
             if (EUserType == ETipoUsuario.Professor)
-                throw new UsuarioJaEProfessorExcecao(); 
-            
+                throw new UsuarioJaEProfessorExcecao();
+
             EUserType = ETipoUsuario.Professor;
         }
         public void DefinirMatricula(string matricula)

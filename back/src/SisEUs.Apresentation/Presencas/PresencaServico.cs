@@ -1,63 +1,70 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using SisEUs.Application.Comum.Mapeamento;
 using SisEUs.Application.Comum.Resultados;
+using SisEUs.Application.Comum.Servicos;
 using SisEUs.Application.Comum.UoW;
-using SisEUs.Application.Eventos.Mappers;
 using SisEUs.Application.Presencas.Abstracoes;
 using SisEUs.Application.Presencas.DTOs.Respostas;
 using SisEUs.Application.Presencas.DTOs.Solicitacoes;
-using SisEUs.Application.Presencas.Mapper;
 using SisEUs.Domain.Comum.Excecoes;
 using SisEUs.Domain.Comum.LoggedUser;
 using SisEUs.Domain.ContextoDeEvento.Entidades;
 using SisEUs.Domain.ContextoDeEvento.Excecoes;
 using SisEUs.Domain.ContextoDeEvento.Interfaces;
 using SisEUs.Domain.ContextoDeUsuario.Interfaces;
-using System.Globalization;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace SisEUs.Application.Presencas
 {
-    public class PresencaServico : IPresencaServico
+    public class PresencaServico(
+        IUsuarioRepositorio usuarioRepositorio,
+        IPresencaRepositorio presencaRepositorio,
+        IEventoRepositorio eventoRepositorio,
+        ILoggedUser loggedUser,
+        ILogger<PresencaServico> logger,
+        IUoW uow,
+        IValidadorDeCoordenadas validadorDeCoordenadas,
+        IMapeadorDeEntidades mapeador) : IPresencaServico
     {
-        private readonly IUsuarioRepositorio _usuarioRepositorio;
-        private readonly IPresencaRepositorio _presencaRepositorio;
-        private readonly IEventoRepositorio _eventoRepositorio;
-        private readonly ILoggedUser _loggedUser;
-        private readonly IUoW _uow;
-        public PresencaServico(
-            IUsuarioRepositorio usuarioRepositorio,
-            IPresencaRepositorio presencaRepositorio,
-            IEventoRepositorio eventoRepositorio,
-            ILoggedUser loggedUser,
-            IUoW uow)
-        {
-            _usuarioRepositorio = usuarioRepositorio;
-            _presencaRepositorio = presencaRepositorio;
-            _eventoRepositorio = eventoRepositorio;
-            _loggedUser = loggedUser;
-            _uow = uow;
-        }
-
         public async Task<Resultado<PresencaResposta>> EfetuarCheckInAsync(EfetuarCheckInSolicitacao request, CancellationToken cancellationToken)
         {
             var dataCheckIn = DateTime.Now;
 
+            logger.LogInformation("Iniciando check-in para usuário {UsuarioId} no evento {EventoId}", request.UsuarioId, request.EventoId);
+
             try
             {
-                var evento = await _eventoRepositorio.ObterEventoPorIdAsync(request.EventoId, cancellationToken);
+                var evento = await eventoRepositorio.ObterEventoPorIdAsync(request.EventoId, cancellationToken);
                 if (evento is null)
+                {
+                    logger.LogWarning("Evento {EventoId} não encontrado para check-in", request.EventoId);
                     return Resultado<PresencaResposta>.Falha(TipoDeErro.NaoEncontrado, "Evento não encontrado.");
+                }
 
-                var distrancia = CalcularDistancia(request.Latitude, request.Longitude, evento.Localizacao.Latitude, evento.Localizacao.Longitude);
-                if (!distrancia)
-                    return Resultado<PresencaResposta>.Falha(TipoDeErro.Validacao, "Usuário fora do raio permitido para check-in.");
+                var resultadoDistancia = validadorDeCoordenadas.ValidarDistanciaParaEvento(
+                    request.Latitude, 
+                    request.Longitude, 
+                    evento.Localizacao.Latitude, 
+                    evento.Localizacao.Longitude);
 
-                var usuario = await _usuarioRepositorio.ObterPorIdAsync(request.UsuarioId, cancellationToken);
+                if (!resultadoDistancia.Sucesso)
+                {
+                    logger.LogWarning("Usuário {UsuarioId} fora do raio permitido para check-in no evento {EventoId}", request.UsuarioId, request.EventoId);
+                    return Resultado<PresencaResposta>.Falha(TipoDeErro.Validacao, resultadoDistancia.Erros.First());
+                }
+
+                var usuario = await usuarioRepositorio.ObterPorIdAsync(request.UsuarioId, cancellationToken);
                 if (usuario is null)
+                {
+                    logger.LogWarning("Usuário {UsuarioId} não encontrado para check-in", request.UsuarioId);
                     return Resultado<PresencaResposta>.Falha(TipoDeErro.NaoEncontrado, "Usuário não encontrado.");
-                var presencaExistente = await _presencaRepositorio.BuscarPorUsuarioEEventoAsync(request.EventoId, request.UsuarioId, cancellationToken);
+                }
+
+                var presencaExistente = await presencaRepositorio.BuscarPorUsuarioEEventoAsync(request.EventoId, request.UsuarioId, cancellationToken);
                 if (presencaExistente != null)
+                {
+                    logger.LogWarning("Usuário {UsuarioId} já possui presença no evento {EventoId}", request.UsuarioId, request.EventoId);
                     return Resultado<PresencaResposta>.Falha(TipoDeErro.Conflito, "Usuário já está presente neste evento.");
+                }
 
                 if (dataCheckIn < evento.DataInicio)
                     throw new EventoNaoComecouExcecao();
@@ -65,62 +72,94 @@ namespace SisEUs.Application.Presencas
                     throw new EventoFinalizadoExcecao("Check-in");
 
                 var presenca = Presenca.Criar(usuario.Id, evento.Id, request.Latitude, request.Longitude);
-
                 presenca.RealizarCheckIn(dataCheckIn);
 
-                await _presencaRepositorio.CriarPresenca(presenca, cancellationToken);
-                await _uow.CommitAsync(cancellationToken);
+                presencaRepositorio.CriarPresenca(presenca, cancellationToken);
+                await uow.CommitAsync(cancellationToken);
 
-                var dto = await presenca.ToResponseDtoAsync(_usuarioRepositorio, _eventoRepositorio, cancellationToken);
+                logger.LogInformation("Check-in realizado com sucesso para usuário {UsuarioId} no evento {EventoId}", request.UsuarioId, request.EventoId);
+
+                var dto = await mapeador.MapearPresencaAsync(presenca, cancellationToken);
                 return Resultado<PresencaResposta>.Ok(dto);
-
             }
             catch (ExcecaoDeDominio ex)
             {
+                logger.LogError(ex, "Erro de domínio ao efetuar check-in para usuário {UsuarioId} no evento {EventoId}", request.UsuarioId, request.EventoId);
                 return Resultado<PresencaResposta>.Falha(TipoDeErro.Validacao, ex.Message);
             }
-
-
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Erro inesperado ao efetuar check-in para usuário {UsuarioId} no evento {EventoId}", request.UsuarioId, request.EventoId);
+                throw;
+            }
         }
 
         public async Task<Resultado<PresencaResposta>> EfetuarCheckOutAsync(EfetuarCheckOutSolicitacao request, CancellationToken cancellationToken)
         {
+            logger.LogInformation("Iniciando check-out para usuário {UsuarioId} no evento {EventoId}", request.UsuarioId, request.EventoId);
+
             try
             {
                 var dataCheckOut = DateTime.Now;
-                var evento = await _eventoRepositorio.ObterEventoPorIdAsync(request.EventoId, cancellationToken);
+                var evento = await eventoRepositorio.ObterEventoPorIdAsync(request.EventoId, cancellationToken);
                 if (evento is null)
+                {
+                    logger.LogWarning("Evento {EventoId} não encontrado para check-out", request.EventoId);
                     return Resultado<PresencaResposta>.Falha(TipoDeErro.NaoEncontrado, "Evento não encontrado.");
+                }
 
-                var distrancia = CalcularDistancia(request.Latitude, request.Longitude, evento.Localizacao.Latitude, evento.Localizacao.Longitude);
-                if (!distrancia)
-                    return Resultado<PresencaResposta>.Falha(TipoDeErro.Validacao, "Usuário fora do raio permitido para check-out.");
+                var resultadoDistancia = validadorDeCoordenadas.ValidarDistanciaParaEvento(
+                    request.Latitude, 
+                    request.Longitude, 
+                    evento.Localizacao.Latitude, 
+                    evento.Localizacao.Longitude);
 
-                var usuario = await _usuarioRepositorio.ObterPorIdAsync(request.UsuarioId, cancellationToken);
+                if (!resultadoDistancia.Sucesso)
+                {
+                    logger.LogWarning("Usuário {UsuarioId} fora do raio permitido para check-out no evento {EventoId}", request.UsuarioId, request.EventoId);
+                    return Resultado<PresencaResposta>.Falha(TipoDeErro.Validacao, resultadoDistancia.Erros.First());
+                }
+
+                var usuario = await usuarioRepositorio.ObterPorIdAsync(request.UsuarioId, cancellationToken);
                 if (usuario is null)
+                {
+                    logger.LogWarning("Usuário {UsuarioId} não encontrado para check-out", request.UsuarioId);
                     return Resultado<PresencaResposta>.Falha(TipoDeErro.NaoEncontrado, "Usuário não encontrado.");
+                }
 
-                var presenca = await _presencaRepositorio.BuscarPorUsuarioEEventoAsync(request.EventoId, request.UsuarioId, cancellationToken);
+                var presenca = await presencaRepositorio.BuscarPorUsuarioEEventoAsync(request.EventoId, request.UsuarioId, cancellationToken);
                 if (presenca is null || !presenca.CheckInValido)
+                {
+                    logger.LogWarning("Check-in ativo não encontrado para usuário {UsuarioId} no evento {EventoId}", request.UsuarioId, request.EventoId);
                     return Resultado<PresencaResposta>.Falha(TipoDeErro.NaoEncontrado, "Nenhum check-in ativo encontrado para este usuário no evento.");
+                }
 
                 if (dataCheckOut < evento.DataInicio || dataCheckOut > evento.DataFim)
                     throw new EventoFinalizadoExcecao("Check-out");
 
                 if (request.UsuarioId != presenca.UsuarioId)
+                {
+                    logger.LogWarning("Tentativa de check-out não autorizada: usuário {UsuarioId} tentou fazer check-out da presença {PresencaId}", request.UsuarioId, presenca.Id);
                     return Resultado<PresencaResposta>.Falha(TipoDeErro.Validacao, "Usuário não autorizado a realizar check-out neste evento.");
+                }
 
                 presenca.RealizarCheckOut(dataCheckOut);
+                await uow.CommitAsync(cancellationToken);
 
-                await _uow.CommitAsync(cancellationToken);
+                logger.LogInformation("Check-out realizado com sucesso para usuário {UsuarioId} no evento {EventoId}", request.UsuarioId, request.EventoId);
 
-                var dto = await presenca.ToResponseDtoAsync(_usuarioRepositorio, _eventoRepositorio, cancellationToken);
-
+                var dto = await mapeador.MapearPresencaAsync(presenca, cancellationToken);
                 return Resultado<PresencaResposta>.Ok(dto);
             }
             catch (ExcecaoDeDominio ex)
             {
+                logger.LogError(ex, "Erro de domínio ao efetuar check-out para usuário {UsuarioId} no evento {EventoId}", request.UsuarioId, request.EventoId);
                 return Resultado<PresencaResposta>.Falha(TipoDeErro.Validacao, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Erro inesperado ao efetuar check-out para usuário {UsuarioId} no evento {EventoId}", request.UsuarioId, request.EventoId);
+                throw;
             }
         }
 
@@ -128,17 +167,19 @@ namespace SisEUs.Application.Presencas
         {
             try
             {
-                var presenca = await _presencaRepositorio.ObterPresencaPorIdAsync(id, cancellationToken);
+                var presenca = await presencaRepositorio.ObterPresencaPorIdAsync(id, cancellationToken);
                 if (presenca is null)
+                {
+                    logger.LogWarning("Presença {PresencaId} não encontrada", id);
                     return Resultado<PresencaResposta>.Falha(TipoDeErro.NaoEncontrado, "Registro de presença não encontrado.");
+                }
 
-                var dto = await presenca.ToResponseDtoAsync(_usuarioRepositorio, _eventoRepositorio, cancellationToken);
-
+                var dto = await mapeador.MapearPresencaAsync(presenca, cancellationToken);
                 return Resultado<PresencaResposta>.Ok(dto);
-
             }
             catch (ExcecaoDeDominio ex)
             {
+                logger.LogError(ex, "Erro ao obter presença {PresencaId}", id);
                 return Resultado<PresencaResposta>.Falha(TipoDeErro.Validacao, ex.Message);
             }
         }
@@ -147,39 +188,56 @@ namespace SisEUs.Application.Presencas
         {
             try
             {
-                var evento = await _eventoRepositorio.ObterEventoPorIdAsync(eventoId, cancellationToken);
+                var evento = await eventoRepositorio.ObterEventoPorIdAsync(eventoId, cancellationToken);
                 if (evento is null)
+                {
+                    logger.LogWarning("Evento {EventoId} não encontrado ao listar presenças", eventoId);
                     return Resultado<IEnumerable<PresencaResposta>>.Falha(TipoDeErro.NaoEncontrado, "Evento não encontrado.");
+                }
 
-                var presencas = await _presencaRepositorio.ObterPresencas();
-                if (presencas is null || !presencas.Any())
+                var presencas = await presencaRepositorio.ObterPresencasPorEventoAsync(eventoId, cancellationToken);
+                if (!presencas.Any())
+                {
+                    logger.LogInformation("Nenhuma presença encontrada para o evento {EventoId}", eventoId);
                     return Resultado<IEnumerable<PresencaResposta>>.Falha(TipoDeErro.NaoEncontrado, "Nenhum registro de presença encontrado para este evento.");
+                }
 
-                var dtosTask = presencas.Select(p => p.ToResponseDtoAsync(_usuarioRepositorio, _eventoRepositorio, cancellationToken));
-                var dtos = await Task.WhenAll(dtosTask);
+                var dtos = await mapeador.MapearPresencasAsync(presencas, cancellationToken);
 
+                logger.LogInformation("Listadas {Count} presenças para o evento {EventoId}", dtos.Count(), eventoId);
                 return Resultado<IEnumerable<PresencaResposta>>.Ok(dtos);
             }
             catch (ExcecaoDeDominio ex)
             {
+                logger.LogError(ex, "Erro ao listar presenças do evento {EventoId}", eventoId);
                 return Resultado<IEnumerable<PresencaResposta>>.Falha(TipoDeErro.Validacao, ex.Message);
             }
         }
+
         public async Task<Resultado<IEnumerable<PresencaResposta>>> ObterRelatorioAsync(CancellationToken cancellationToken = default)
         {
+            logger.LogWarning("Método ObterRelatorioAsync foi chamado - considere usar paginação");
+
             try
             {
-                var presencas = await _presencaRepositorio.ObterPresencas();
-                if (presencas is null || !presencas.Any())
+#pragma warning disable CS0618
+                var presencas = await presencaRepositorio.ObterPresencas();
+#pragma warning restore CS0618
+
+                if (!presencas.Any())
+                {
+                    logger.LogInformation("Nenhuma presença encontrada no sistema");
                     return Resultado<IEnumerable<PresencaResposta>>.Falha(TipoDeErro.NaoEncontrado, "Nenhum registro de presença encontrado.");
+                }
 
-                var dtosTask = presencas.Select(p => p.ToResponseDtoAsync(_usuarioRepositorio, _eventoRepositorio, cancellationToken));
-                var dtos = await Task.WhenAll(dtosTask);
+                var dtos = await mapeador.MapearPresencasAsync(presencas, cancellationToken);
+
+                logger.LogInformation("Relatório gerado com {Count} presenças", dtos.Count());
                 return Resultado<IEnumerable<PresencaResposta>>.Ok(dtos);
-
             }
             catch (ExcecaoDeDominio ex)
             {
+                logger.LogError(ex, "Erro ao gerar relatório de presenças");
                 return Resultado<IEnumerable<PresencaResposta>>.Falha(TipoDeErro.Validacao, ex.Message);
             }
         }
@@ -188,29 +246,33 @@ namespace SisEUs.Application.Presencas
         {
             try
             {
-
-                var usuarioAtual = await _loggedUser.User();
-
-                var eventoExiste = await _eventoRepositorio.ObterEventoPorIdAsync(eventoId, cancellationToken);
+                var usuarioAtual = await loggedUser.User();
+                var eventoExiste = await eventoRepositorio.ObterEventoPorIdAsync(eventoId, cancellationToken);
 
                 if (eventoExiste is null)
-                    return Resultado<StatusPresencaResposta>.Falha(TipoDeErro.NaoEncontrado, "Evento não encontrado.");
-
-                var presencas = await _presencaRepositorio.ObterStatusPresencaPorEvento(eventoId, usuarioAtual.Id, cancellationToken);
-
-                if (presencas is null)
-                    return Resultado<StatusPresencaResposta>.Falha(TipoDeErro.NaoEncontrado, "Nenhum registro de presença encontrado para este usuário neste evento.");
-
-                var status = new StatusPresencaResposta
                 {
-                    CheckInEfetuado = presencas.CheckInValido,
-                    CheckOutEfetuado = presencas.CheckOutValido,
-                };
+                    logger.LogWarning("Evento {EventoId} não encontrado ao obter status de presença", eventoId);
+                    return Resultado<StatusPresencaResposta>.Falha(TipoDeErro.NaoEncontrado, "Evento não encontrado.");
+                }
+
+                var presenca = await presencaRepositorio.ObterStatusPresencaPorEvento(eventoId, usuarioAtual.Id, cancellationToken);
+
+                if (presenca is null)
+                {
+                    logger.LogInformation("Nenhuma presença encontrada para usuário {UsuarioId} no evento {EventoId}", usuarioAtual.Id, eventoId);
+                    return Resultado<StatusPresencaResposta>.Falha(TipoDeErro.NaoEncontrado, "Nenhum registro de presença encontrado para este usuário neste evento.");
+                }
+
+                var status = new StatusPresencaResposta(
+                    CheckInEfetuado: presenca.CheckInValido,
+                    CheckOutEfetuado: presenca.CheckOutValido
+                );
 
                 return Resultado<StatusPresencaResposta>.Ok(status);
             }
             catch (ExcecaoDeDominio ex)
             {
+                logger.LogError(ex, "Erro ao obter status de presença do evento {EventoId}", eventoId);
                 return Resultado<StatusPresencaResposta>.Falha(TipoDeErro.Validacao, ex.Message);
             }
         }
@@ -219,62 +281,35 @@ namespace SisEUs.Application.Presencas
         {
             try
             {
-                var usuarioAtual = await _loggedUser.User();
+                var usuarioAtual = await loggedUser.User();
 
-                var eventoEmAndamento = await _presencaRepositorio.ObterPresencaEventoEmAndamentoAsync(cancellationToken);
+                var eventoEmAndamento = await presencaRepositorio.ObterPresencaEventoEmAndamentoAsync(usuarioAtual.Id, cancellationToken);
                 if (eventoEmAndamento is null)
+                {
+                    logger.LogInformation("Nenhum evento em andamento para usuário {UsuarioId}", usuarioAtual.Id);
                     return Resultado<bool?>.Falha(TipoDeErro.NaoEncontrado, "Nenhum evento em andamento encontrado.");
+                }
 
-                var evento = await _eventoRepositorio.ObterEventoPorIdAsync(eventoEmAndamento.EventoId, cancellationToken);
+                var evento = await eventoRepositorio.ObterEventoPorIdAsync(eventoEmAndamento.EventoId, cancellationToken);
                 if (evento is null)
+                {
+                    logger.LogWarning("Evento {EventoId} não encontrado para presença em andamento", eventoEmAndamento.EventoId);
                     return Resultado<bool?>.Falha(TipoDeErro.NaoEncontrado, "Evento não encontrado.");
+                }
 
                 if (evento.DataFim < DateTime.Now)
+                {
+                    logger.LogInformation("Evento {EventoId} já finalizado", evento.Id);
                     return Resultado<bool?>.Falha(TipoDeErro.NaoEncontrado, "Evento já finalizado.");
+                }
 
                 return Resultado<bool?>.Ok(true);
-
             }
             catch (ExcecaoDeDominio ex)
             {
+                logger.LogError(ex, "Erro ao obter presença em andamento");
                 return Resultado<bool?>.Falha(TipoDeErro.Validacao, ex.Message);
-
             }
-        }
-        private static double ParaRadianos(double anguloEmGraus)
-        {
-            return anguloEmGraus * Math.PI / 180;
-        }
-        private static bool CalcularDistancia(string l1, string l2, string r1, string r2)
-        {
-            var latitude1 = ConverterStringToDouble(l1);
-            var longitude1 = ConverterStringToDouble(l2);
-            var latitude2 = ConverterStringToDouble(r1);
-            var longitude2 = ConverterStringToDouble(r2);
-
-            var lat1Rad = ParaRadianos(latitude1);
-            var lon1Rad = ParaRadianos(longitude1);
-            var lat2Rad = ParaRadianos(latitude2);
-            var lon2Rad = ParaRadianos(longitude2);
-
-            var deltaLat = lat2Rad - lat1Rad;
-            var deltaLon = lon2Rad - lon1Rad;
-
-            var a = Math.Sin(deltaLat / 2) * Math.Sin(deltaLat / 2) +
-                    Math.Cos(lat1Rad) * Math.Cos(lat2Rad) *
-                    Math.Sin(deltaLon / 2) * Math.Sin(deltaLon / 2);
-
-            var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
-
-            var distancia = 6371000 * c;
-
-            return distancia <= 100;
-        }
-        private static double ConverterStringToDouble(string a)
-        {
-            double result;
-            double.TryParse(a, NumberStyles.Any, CultureInfo.InvariantCulture, out result);
-            return result;
         }
     }
 }

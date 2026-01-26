@@ -13,7 +13,7 @@ namespace SisEUs.Domain.ContextoDeEvento.ObjetosDeValor
             Valor = valor;
         }
         private Titulo() { }
-        public string Valor { get; }
+        public string Valor { get; } = null!;
 
         public static Titulo Criar(string valor)
         {

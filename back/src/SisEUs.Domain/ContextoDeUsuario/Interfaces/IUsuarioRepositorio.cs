@@ -1,9 +1,5 @@
 ﻿using SisEUs.Domain.ContextoDeUsuario.Entidades;
 using SisEUs.Domain.ContextoDeUsuario.ObjetosDeValor;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using System; // Adicionado para Guid
 
 namespace SisEUs.Domain.ContextoDeUsuario.Interfaces
 {

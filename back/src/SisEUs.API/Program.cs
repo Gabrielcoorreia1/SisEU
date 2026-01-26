@@ -1,18 +1,14 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SisEUs.API.Token;
-using SisEUs.Application;
+using SisEUs.Application.Comum.Configuracoes;
 using SisEUs.Domain.Comum.Token;
 using SisEUs.Infrastructure;
 using SisEUs.Infrastructure.Migracao;
+using SisEUs.Infrastructure.Repositorios;
 using System.Text;
-using System.Globalization;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
-using System.Reflection; 
-using SisEUs.Apresentation.Authenticacoes; 
-using SisEUs.Apresentation.Checkin;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -24,6 +20,10 @@ if (string.IsNullOrEmpty(jwtSigningKey))
     throw new InvalidOperationException("A chave de assinatura (Settings:Jwt:SigningKey) não foi configurada em appsettings.json.");
 }
 
+// Configuração de Geolocalização
+builder.Services.Configure<GeolocalizacaoConfig>(
+    configuration.GetSection(GeolocalizacaoConfig.SectionName));
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -31,7 +31,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSigningKey)),
-            
+
             ValidateIssuer = false,
             ValidIssuer = configuration["Settings:Jwt:Issuer"],
 
@@ -48,7 +48,7 @@ builder.Services.Configure<Microsoft.AspNetCore.Mvc.JsonOptions>(options =>
     options.JsonSerializerOptions.NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString;
 });
 
-builder.Services.AddControllers(); 
+builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -90,7 +90,7 @@ builder.Services.AddSwaggerGen(options =>
             {
                 Reference = new OpenApiReference
                 {
-                    Type = ReferenceType.SecurityScheme, 
+                    Type = ReferenceType.SecurityScheme,
                     Id = "Bearer"
                 },
                 Scheme = "oauth2",
@@ -110,11 +110,41 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    var context = services.GetRequiredService<SisEUs.Infrastructure.Repositorios.AppDbContext>();
+    var logger = services.GetRequiredService<ILogger<Program>>();
+    
+    try
+    {
+        var context = services.GetRequiredService<AppDbContext>();
 
-    context.Database.EnsureDeleted(); 
-    context.Database.EnsureCreated(); 
-    await InitBD.SeedAsync(context);
+        if (app.Environment.IsDevelopment())
+        {
+            logger.LogInformation("Aplicando migrations pendentes...");
+            await context.Database.MigrateAsync();
+            
+            logger.LogInformation("Verificando necessidade de seed...");
+            if (!await context.Usuarios.AnyAsync())
+            {
+                logger.LogInformation("Executando seed do banco de dados...");
+                await InitBD.SeedAsync(context);
+                logger.LogInformation("Seed concluído com sucesso!");
+            }
+            else
+            {
+                logger.LogInformation("Banco de dados já contém dados. Seed ignorado.");
+            }
+        }
+        else
+        {
+            logger.LogInformation("Aplicando migrations em produção...");
+            await context.Database.MigrateAsync();
+            logger.LogInformation("Migrations aplicadas com sucesso!");
+        }
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro ao inicializar o banco de dados");
+        throw;
+    }
 }
 
 if (app.Environment.IsDevelopment())

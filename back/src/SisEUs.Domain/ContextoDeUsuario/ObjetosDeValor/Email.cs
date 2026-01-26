@@ -10,7 +10,7 @@ namespace SisEUs.Domain.ContextoDeUsuario.ObjetosDeValor
         {
             Valor = valor;
         }
-        public string Valor { get; }
+        public string Valor { get; } = null!;
         public static Email Criar(string value)
         {
             if (string.IsNullOrWhiteSpace(value))

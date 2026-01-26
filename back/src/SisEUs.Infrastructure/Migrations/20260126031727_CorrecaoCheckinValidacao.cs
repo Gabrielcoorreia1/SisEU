@@ -5,7 +5,7 @@
 namespace SisEUs.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class MigracaoFinalComDadosCorretos : Migration
+    public partial class CorrecaoCheckinValidacao : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

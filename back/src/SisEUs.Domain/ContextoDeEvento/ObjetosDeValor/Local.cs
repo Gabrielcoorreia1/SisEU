@@ -37,9 +37,9 @@ namespace SisEUs.Domain.ContextoDeEvento.ObjetosDeValor
                    sala.Length >= TamanhoMin &&
                    sala.Length <= TamanhoMax;
         }
-        public string Campus { get; }
-        public string Departamento { get; }
-        public string Bloco { get; }
-        public string Sala { get; }
+        public string Campus { get; } = null!;
+        public string Departamento { get; } = null!;
+        public string Bloco { get; } = null!;
+        public string Sala { get; } = null!;
     }
 }
