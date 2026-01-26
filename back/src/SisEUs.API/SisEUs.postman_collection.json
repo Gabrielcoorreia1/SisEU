@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "siseus-api-collection",
     "name": "SisEUs API",
-    "description": "Coleção completa para testes da API SisEUs",
+    "description": "Coleï¿½ï¿½o completa para testes da API SisEUs",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -17,7 +17,7 @@
   ],
   "item": [
     {
-      "name": "?? Autenticação",
+      "name": "?? Autenticaï¿½ï¿½o",
       "item": [
         {
           "name": "Login - Admin",
@@ -120,7 +120,7 @@
           }
         },
         {
-          "name": "Registrar Novo Usuário",
+          "name": "Registrar Novo Usuï¿½rio",
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
@@ -132,7 +132,7 @@
           }
         },
         {
-          "name": "Buscar Usuários por Nome",
+          "name": "Buscar Usuï¿½rios por Nome",
           "request": {
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
@@ -145,7 +145,7 @@
           }
         },
         {
-          "name": "Buscar Usuário por ID",
+          "name": "Buscar Usuï¿½rio por ID",
           "request": {
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
@@ -167,7 +167,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"titulo\": \"Semana de Tecnologia 2024\",\n    \"dataInicio\": \"2025-06-15T09:00:00\",\n    \"dataFim\": \"2025-06-15T18:00:00\",\n    \"local\": {\n        \"campus\": 1,\n        \"departamento\": \"CC\",\n        \"bloco\": \"A\",\n        \"sala\": \"101\"\n    },\n    \"eTipoEvento\": 2,\n    \"avaliadores\": [6, 7],\n    \"imgUrl\": \"https://exemplo.com/evento.jpg\",\n    \"codigoUnico\": \"TECH24\",\n    \"apresentacoes\": [\n        {\n            \"id\": null,\n            \"eventoId\": 0,\n            \"titulo\": \"Introdução ao .NET 8\",\n            \"nomeAutor\": \"João Silva\",\n            \"nomeOrientador\": \"Maria Santos\",\n            \"modalidade\": 1\n        }\n    ]\n}"
+              "raw": "{\n    \"titulo\": \"Semana de Tecnologia 2024\",\n    \"dataInicio\": \"2025-06-15T09:00:00\",\n    \"dataFim\": \"2025-06-15T18:00:00\",\n    \"local\": {\n        \"campus\": 1,\n        \"departamento\": \"CC\",\n        \"bloco\": \"A\",\n        \"sala\": \"101\"\n    },\n    \"eTipoEvento\": 2,\n    \"avaliadores\": [6, 7],\n    \"imgUrl\": \"https://exemplo.com/evento.jpg\",\n    \"codigoUnico\": \"TECH24\",\n    \"apresentacoes\": [\n        {\n            \"id\": null,\n            \"eventoId\": 0,\n            \"titulo\": \"Introduï¿½ï¿½o ao .NET 8\",\n            \"nomeAutor\": \"Joï¿½o Silva\",\n            \"nomeOrientador\": \"Maria Santos\",\n            \"modalidade\": 1\n        }\n    ]\n}"
             },
             "url": "{{baseUrl}}/eventos"
           }
@@ -197,7 +197,7 @@
           }
         },
         {
-          "name": "Obter Evento por Código",
+          "name": "Obter Evento por Cï¿½digo",
           "request": {
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
@@ -275,10 +275,10 @@
       ]
     },
     {
-      "name": "?? Apresentações",
+      "name": "?? Apresentaï¿½ï¿½es",
       "item": [
         {
-          "name": "Criar Apresentação",
+          "name": "Criar Apresentaï¿½ï¿½o",
           "request": {
             "method": "POST",
             "header": [
@@ -293,7 +293,7 @@
           }
         },
         {
-          "name": "Listar Apresentações por Evento",
+          "name": "Listar Apresentaï¿½ï¿½es por Evento",
           "request": {
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
@@ -301,7 +301,7 @@
           }
         },
         {
-          "name": "Obter Apresentação por ID",
+          "name": "Obter Apresentaï¿½ï¿½o por ID",
           "request": {
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
@@ -309,7 +309,7 @@
           }
         },
         {
-          "name": "Atualizar Apresentação",
+          "name": "Atualizar Apresentaï¿½ï¿½o",
           "request": {
             "method": "PUT",
             "header": [
@@ -318,13 +318,13 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"id\": 1,\n    \"titulo\": \"IA Generativa - Versão Revisada\",\n    \"nomeAutor\": \"Ana Silva\",\n    \"nomeOrientador\": \"Prof. Carlos Souza\"\n}"
+              "raw": "{\n    \"id\": 1,\n    \"titulo\": \"IA Generativa - Versï¿½o Revisada\",\n    \"nomeAutor\": \"Ana Silva\",\n    \"nomeOrientador\": \"Prof. Carlos Souza\"\n}"
             },
             "url": "{{baseUrl}}/apresentacoes/1"
           }
         },
         {
-          "name": "Excluir Apresentação",
+          "name": "Excluir Apresentaï¿½ï¿½o",
           "request": {
             "method": "DELETE",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
@@ -334,7 +334,7 @@
       ]
     },
     {
-      "name": "? Presenças",
+      "name": "? Presenï¿½as",
       "item": [
         {
           "name": "Efetuar Check-In",
@@ -367,7 +367,7 @@
           }
         },
         {
-          "name": "Obter Presença por ID",
+          "name": "Obter Presenï¿½a por ID",
           "request": {
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
@@ -375,7 +375,7 @@
           }
         },
         {
-          "name": "Listar Presenças por Evento",
+          "name": "Listar Presenï¿½as por Evento",
           "request": {
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
@@ -383,7 +383,7 @@
           }
         },
         {
-          "name": "Relatório de Presenças",
+          "name": "Relatï¿½rio de Presenï¿½as",
           "request": {
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
@@ -391,7 +391,7 @@
           }
         },
         {
-          "name": "Status de Presença em Evento",
+          "name": "Status de Presenï¿½a em Evento",
           "request": {
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
@@ -399,7 +399,7 @@
           }
         },
         {
-          "name": "Presença em Evento em Andamento",
+          "name": "Presenï¿½a em Evento em Andamento",
           "request": {
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
@@ -470,7 +470,7 @@
           }
         },
         {
-          "name": "Relatório de Check-ins",
+          "name": "Relatï¿½rio de Check-ins",
           "request": {
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
@@ -480,10 +480,10 @@
       ]
     },
     {
-      "name": "? Avaliações",
+      "name": "? Avaliaï¿½ï¿½es",
       "item": [
         {
-          "name": "Iniciar Avaliação",
+          "name": "Iniciar Avaliaï¿½ï¿½o",
           "request": {
             "method": "POST",
             "header": [
@@ -498,7 +498,7 @@
           }
         },
         {
-          "name": "Enviar Avaliação",
+          "name": "Enviar Avaliaï¿½ï¿½o",
           "request": {
             "method": "POST",
             "header": [
@@ -507,13 +507,13 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"nota\": 8.5,\n    \"parecer\": \"Excelente apresentação! Conteúdo bem estruturado e boa didática. Sugiro aprofundar os exemplos práticos.\"\n}"
+              "raw": "{\n    \"nota\": 8.5,\n    \"parecer\": \"Excelente apresentaï¿½ï¿½o! Conteï¿½do bem estruturado e boa didï¿½tica. Sugiro aprofundar os exemplos prï¿½ticos.\"\n}"
             },
             "url": "{{baseUrl}}/avaliacoes/1/enviar"
           }
         },
         {
-          "name": "Obter Avaliação por ID",
+          "name": "Obter Avaliaï¿½ï¿½o por ID",
           "request": {
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
@@ -521,7 +521,7 @@
           }
         },
         {
-          "name": "Listar Avaliações por Apresentação",
+          "name": "Listar Avaliaï¿½ï¿½es por Apresentaï¿½ï¿½o",
           "request": {
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
@@ -529,7 +529,7 @@
           }
         },
         {
-          "name": "Listar Minhas Avaliações",
+          "name": "Listar Minhas Avaliaï¿½ï¿½es",
           "request": {
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
@@ -537,7 +537,7 @@
           }
         },
         {
-          "name": "Listar Avaliações por Evento",
+          "name": "Listar Avaliaï¿½ï¿½es por Evento",
           "request": {
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
@@ -545,7 +545,7 @@
           }
         },
         {
-          "name": "Relatório de Apresentação",
+          "name": "Relatï¿½rio de Apresentaï¿½ï¿½o",
           "request": {
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
@@ -553,7 +553,7 @@
           }
         },
         {
-          "name": "Relatório de Evento",
+          "name": "Relatï¿½rio de Evento",
           "request": {
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
