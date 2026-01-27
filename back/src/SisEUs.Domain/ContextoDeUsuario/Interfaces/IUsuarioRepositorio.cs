@@ -13,6 +13,7 @@ namespace SisEUs.Domain.ContextoDeUsuario.Interfaces
         Task AdicionarAsync(Usuario usuario, CancellationToken cancellationToken = default);
         void Atualizar(Usuario usuario);
         Task<Usuario?> ObterPorCpfAsync(Cpf cpf, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Usuario>> ObterPorCpfsAsync(IEnumerable<string> cpfs, CancellationToken cancellationToken = default);
         Task<IEnumerable<Usuario>> BuscarPorNomeProfessorAsync(string nome, CancellationToken cancellationToken = default);
         Task<IEnumerable<Usuario>> ObterTodosUsuariosAsync();
         Task<Usuario?> ObterPorUserIdentifierAsync(Guid userIdentifier, CancellationToken cancellationToken = default);

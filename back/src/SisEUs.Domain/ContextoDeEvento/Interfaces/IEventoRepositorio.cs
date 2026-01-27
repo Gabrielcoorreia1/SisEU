@@ -8,6 +8,7 @@ namespace SisEUs.Domain.ContextoDeEvento.Interfaces
         Task<Evento?> ObterEventoPorIdAsync(int eventoId, CancellationToken cancellationToken = default!);
         Task<IEnumerable<Evento>> ObterEventosAsync();
         Task<IEnumerable<Evento>> ObterEventosPaginadosAsync(int skip, int take, CancellationToken cancellationToken = default!);
+        Task<IEnumerable<Evento>> ObterEventosPorAvaliadorIdAsync(int avaliadorId, CancellationToken cancellationToken = default!);
         Task CriarEventoAsync(Evento evento, CancellationToken cancellationToken = default!);
         void ExcluirEvento(Evento evento);
         Task<bool> CodigoUnicoJaExisteAsync(string codigoUnico, int? eventoIdExcluir = null, CancellationToken cancellationToken = default!);

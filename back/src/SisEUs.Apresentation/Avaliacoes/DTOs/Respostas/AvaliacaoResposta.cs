@@ -1,3 +1,4 @@
+using SisEUs.Application.Comum.DTOs;
 using SisEUs.Domain.ContextoDeEvento.Enumeracoes;
 
 namespace SisEUs.Application.Avaliacoes.DTOs.Respostas
@@ -6,7 +7,7 @@ namespace SisEUs.Application.Avaliacoes.DTOs.Respostas
         int Id,
         int ApresentacaoId,
         string TituloApresentacao,
-        string NomeAutor,
+        UsuarioResposta Autor,
         EModalidadeApresentacao Modalidade,
         int AvaliadorId,
         decimal? Nota,

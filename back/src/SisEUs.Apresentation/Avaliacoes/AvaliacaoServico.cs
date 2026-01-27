@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using SisEUs.Application.Avaliacoes.Abstracoes;
 using SisEUs.Application.Avaliacoes.DTOs.Respostas;
 using SisEUs.Application.Avaliacoes.DTOs.Solicitacoes;
+using SisEUs.Application.Comum.DTOs;
 using SisEUs.Application.Comum.Resultados;
 using SisEUs.Application.Comum.UoW;
 using SisEUs.Domain.Comum.Excecoes;
@@ -9,6 +10,7 @@ using SisEUs.Domain.Comum.LoggedUser;
 using SisEUs.Domain.ContextoDeEvento.Entidades;
 using SisEUs.Domain.ContextoDeEvento.Enumeracoes;
 using SisEUs.Domain.ContextoDeEvento.Interfaces;
+using SisEUs.Domain.ContextoDeUsuario.Entidades;
 using SisEUs.Domain.ContextoDeUsuario.Interfaces;
 
 namespace SisEUs.Application.Avaliacoes
@@ -42,7 +44,7 @@ namespace SisEUs.Application.Avaliacoes
                 {
                     logger.LogWarning("Avaliador {AvaliadorId} já possui avaliação para apresentação {ApresentacaoId}", usuarioAtual.Id, apresentacaoId);
                     
-                    var dtoExistente = MapearParaResposta(avaliacaoExistente);
+                    var dtoExistente = await MapearParaRespostaAsync(avaliacaoExistente, cancellationToken);
                     return Resultado<AvaliacaoResposta>.Ok(dtoExistente);
                 }
 
@@ -55,7 +57,7 @@ namespace SisEUs.Application.Avaliacoes
 
                 logger.LogInformation("Avaliação {AvaliacaoId} iniciada com sucesso para apresentação {ApresentacaoId}", avaliacao!.Id, apresentacaoId);
 
-                var dto = MapearParaResposta(avaliacao);
+                var dto = await MapearParaRespostaAsync(avaliacao, cancellationToken);
                 return Resultado<AvaliacaoResposta>.Ok(dto);
             }
             catch (ExcecaoDeDominio ex)
@@ -85,21 +87,19 @@ namespace SisEUs.Application.Avaliacoes
                     return Resultado<AvaliacaoResposta>.Falha(TipoDeErro.NaoEncontrado, "Avaliação não encontrada.");
                 }
 
-                // Verificar se o avaliador logado é o dono da avaliação
                 if (avaliacao.AvaliadorId != usuarioAtual.Id)
                 {
                     logger.LogWarning("Avaliador {AvaliadorId} não autorizado a enviar avaliação {AvaliacaoId}", usuarioAtual.Id, avaliacaoId);
                     return Resultado<AvaliacaoResposta>.Falha(TipoDeErro.AcessoNegado, "Você não tem permissão para enviar esta avaliação.");
                 }
 
-                // Aplicar a avaliação (o método Avaliar já valida se está concluída)
                 avaliacao.Avaliar(nota, parecer ?? string.Empty);
 
                 await uow.CommitAsync(cancellationToken);
 
                 logger.LogInformation("Avaliação {AvaliacaoId} enviada com sucesso. Nota: {Nota}", avaliacaoId, nota);
 
-                var dto = MapearParaResposta(avaliacao);
+                var dto = await MapearParaRespostaAsync(avaliacao, cancellationToken);
                 return Resultado<AvaliacaoResposta>.Ok(dto);
             }
             catch (ExcecaoDeDominio ex)
@@ -125,7 +125,7 @@ namespace SisEUs.Application.Avaliacoes
                     return Resultado<AvaliacaoResposta>.Falha(TipoDeErro.NaoEncontrado, "Avaliação não encontrada.");
                 }
 
-                var dto = MapearParaResposta(avaliacao);
+                var dto = await MapearParaRespostaAsync(avaliacao, cancellationToken);
                 return Resultado<AvaliacaoResposta>.Ok(dto);
             }
             catch (ExcecaoDeDominio ex)
@@ -148,9 +148,13 @@ namespace SisEUs.Application.Avaliacoes
 
                 var avaliacoes = await avaliacaoRepositorio.ObterPorApresentacaoAsync(apresentacaoId, cancellationToken);
 
-                var dtos = avaliacoes.Select(MapearParaResposta);
+                var dtos = new List<AvaliacaoResposta>();
+                foreach (var avaliacao in avaliacoes)
+                {
+                    dtos.Add(await MapearParaRespostaAsync(avaliacao, cancellationToken));
+                }
 
-                logger.LogInformation("Listadas {Count} avaliações para apresentação {ApresentacaoId}", dtos.Count(), apresentacaoId);
+                logger.LogInformation("Listadas {Count} avaliações para apresentação {ApresentacaoId}", dtos.Count, apresentacaoId);
                 return Resultado<IEnumerable<AvaliacaoResposta>>.Ok(dtos);
             }
             catch (ExcecaoDeDominio ex)
@@ -168,9 +172,13 @@ namespace SisEUs.Application.Avaliacoes
 
                 var avaliacoes = await avaliacaoRepositorio.ObterPorAvaliadorAsync(usuarioAtual.Id, cancellationToken);
 
-                var dtos = avaliacoes.Select(MapearParaResposta);
+                var dtos = new List<AvaliacaoResposta>();
+                foreach (var avaliacao in avaliacoes)
+                {
+                    dtos.Add(await MapearParaRespostaAsync(avaliacao, cancellationToken));
+                }
 
-                logger.LogInformation("Listadas {Count} avaliações do avaliador {AvaliadorId}", dtos.Count(), usuarioAtual.Id);
+                logger.LogInformation("Listadas {Count} avaliações do avaliador {AvaliadorId}", dtos.Count, usuarioAtual.Id);
                 return Resultado<IEnumerable<AvaliacaoResposta>>.Ok(dtos);
             }
             catch (ExcecaoDeDominio ex)
@@ -193,9 +201,13 @@ namespace SisEUs.Application.Avaliacoes
 
                 var avaliacoes = await avaliacaoRepositorio.ObterPorEventoAsync(eventoId, cancellationToken);
 
-                var dtos = avaliacoes.Select(MapearParaResposta);
+                var dtos = new List<AvaliacaoResposta>();
+                foreach (var avaliacao in avaliacoes)
+                {
+                    dtos.Add(await MapearParaRespostaAsync(avaliacao, cancellationToken));
+                }
 
-                logger.LogInformation("Listadas {Count} avaliações para evento {EventoId}", dtos.Count(), eventoId);
+                logger.LogInformation("Listadas {Count} avaliações para evento {EventoId}", dtos.Count, eventoId);
                 return Resultado<IEnumerable<AvaliacaoResposta>>.Ok(dtos);
             }
             catch (ExcecaoDeDominio ex)
@@ -220,6 +232,13 @@ namespace SisEUs.Application.Avaliacoes
 
                 var avaliacoes = await avaliacaoRepositorio.ObterPorApresentacaoAsync(apresentacaoId, cancellationToken);
                 var listaAvaliacoes = avaliacoes.ToList();
+
+                // Obter autor e orientador
+                var autor = await usuarioRepositorio.ObterPorIdAsync(apresentacao.AutorId, cancellationToken);
+                var orientador = await usuarioRepositorio.ObterPorIdAsync(apresentacao.OrientadorId, cancellationToken);
+
+                var autorDto = MapearUsuario(autor);
+                var orientadorDto = MapearUsuario(orientador);
 
                 // Obter nomes dos avaliadores
                 var avaliadoresIds = listaAvaliacoes.Select(a => a.AvaliadorId).Distinct();
@@ -247,8 +266,8 @@ namespace SisEUs.Application.Avaliacoes
                 var relatorio = new RelatorioApresentacaoResposta(
                     ApresentacaoId: apresentacao.Id,
                     TituloApresentacao: apresentacao.Titulo?.Valor ?? string.Empty,
-                    NomeAutor: apresentacao.NomeAutor,
-                    NomeOrientador: apresentacao.NomeOrientador,
+                    Autor: autorDto,
+                    Orientador: orientadorDto,
                     Modalidade: apresentacao.Modalidade,
                     TotalAvaliacoes: listaAvaliacoes.Count,
                     AvaliacoesConcluidas: avaliacoesConcluidas.Count,
@@ -293,6 +312,11 @@ namespace SisEUs.Application.Avaliacoes
                 var avaliacoes = await avaliacaoRepositorio.ObterPorEventoAsync(eventoId, cancellationToken);
                 var listaAvaliacoes = avaliacoes.ToList();
 
+                // Obter todos os autores
+                var autoresIds = listaApresentacoes.Select(a => a.AutorId).Distinct();
+                var autores = await usuarioRepositorio.ObterPorIdsAsync(autoresIds, cancellationToken);
+                var autoresDict = autores.ToDictionary(u => u.Id);
+
                 var todasNotasConcluidas = listaAvaliacoes
                     .Where(a => a.Estado == EEstadoAvaliacao.Concluido && a.Nota.HasValue)
                     .Select(a => a.Nota!.Value)
@@ -308,10 +332,14 @@ namespace SisEUs.Application.Avaliacoes
 
                     var media = notasConcluidas.Any() ? Math.Round(notasConcluidas.Average(), 2) : (decimal?)null;
 
+                    var autorDto = autoresDict.TryGetValue(apresentacao.AutorId, out var autor)
+                        ? MapearUsuario(autor)
+                        : new UsuarioResposta(0, "Autor não encontrado", "Sem cpf", "Sem email");
+
                     var resumo = new ResumoApresentacaoResposta(
                         ApresentacaoId: apresentacao.Id,
                         TituloApresentacao: apresentacao.Titulo?.Valor ?? string.Empty,
-                        NomeAutor: apresentacao.NomeAutor,
+                        Autor: autorDto,
                         Modalidade: apresentacao.Modalidade,
                         TotalAvaliacoes: avaliacoesDaApresentacao.Count,
                         AvaliacoesConcluidas: avaliacoesConcluidas.Count,
@@ -371,20 +399,50 @@ namespace SisEUs.Application.Avaliacoes
             };
         }
 
-        private static AvaliacaoResposta MapearParaResposta(Avaliacao avaliacao)
+        private async Task<AvaliacaoResposta> MapearParaRespostaAsync(Avaliacao avaliacao, CancellationToken cancellationToken)
         {
+            var apresentacao = avaliacao.Apresentacao ?? await apresentacaoRepositorio.ObterPorIdAsync(avaliacao.ApresentacaoId, cancellationToken);
+            
+            Usuario? autor = null;
+            if (apresentacao is not null)
+            {
+                autor = await usuarioRepositorio.ObterPorIdAsync(apresentacao.AutorId, cancellationToken);
+            }
+
+            var autorDto = MapearUsuario(autor);
+
             return new AvaliacaoResposta(
                 Id: avaliacao.Id,
                 ApresentacaoId: avaliacao.ApresentacaoId,
-                TituloApresentacao: avaliacao.Apresentacao?.Titulo?.Valor ?? string.Empty,
-                NomeAutor: avaliacao.Apresentacao?.NomeAutor ?? string.Empty,
-                Modalidade: avaliacao.Apresentacao?.Modalidade ?? default,
+                TituloApresentacao: apresentacao?.Titulo?.Valor ?? string.Empty,
+                Autor: autorDto,
+                Modalidade: apresentacao?.Modalidade ?? default,
                 AvaliadorId: avaliacao.AvaliadorId,
                 Nota: avaliacao.Nota,
                 Parecer: avaliacao.Parecer,
                 Estado: avaliacao.Estado.ToString(),
                 DataInicio: avaliacao.DataInicio,
                 DataConclusao: avaliacao.DataConclusao
+            );
+        }
+
+        private static UsuarioResposta MapearUsuario(Usuario? usuario)
+        {
+            if (usuario is null)
+            {
+                return new UsuarioResposta(
+                    Id: 0,
+                    NomeCompleto: "Usuário não encontrado",
+                    Cpf: "Sem cpf",
+                    Email: "Sem email"
+                );
+            }
+
+            return new UsuarioResposta(
+                Id: usuario.Id,
+                NomeCompleto: $"{usuario.Nome.Nome} {usuario.Nome.Sobrenome}",
+                Cpf: usuario.Cpf.Valor,
+                Email: usuario.Email.Valor
             );
         }
 

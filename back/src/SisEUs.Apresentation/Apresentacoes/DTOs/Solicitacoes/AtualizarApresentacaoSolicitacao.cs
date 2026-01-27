@@ -4,7 +4,7 @@
     (
         int Id,
         string Titulo,
-        string NomeAutor,
-        string NomeOrientador
+        string CpfAutor,
+        string CpfOrientador
     );
 }

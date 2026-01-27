@@ -1,3 +1,4 @@
+using SisEUs.Application.Comum.DTOs;
 using SisEUs.Domain.ContextoDeEvento.Enumeracoes;
 
 namespace SisEUs.Application.Avaliacoes.DTOs.Respostas
@@ -8,8 +9,8 @@ namespace SisEUs.Application.Avaliacoes.DTOs.Respostas
     public record RelatorioApresentacaoResposta(
         int ApresentacaoId,
         string TituloApresentacao,
-        string NomeAutor,
-        string NomeOrientador,
+        UsuarioResposta Autor,
+        UsuarioResposta Orientador,
         EModalidadeApresentacao Modalidade,
         int TotalAvaliacoes,
         int AvaliacoesConcluidas,

@@ -13,5 +13,6 @@ namespace SisEUs.Application.Apresentacoes.Abstractions
         Task<Resultado<IEnumerable<ApresentacaoResposta>>> ObterApresentacoesPorEventoAsync(int eventoId, CancellationToken cancellationToken);
         Task<Resultado> ExcluirApresentacaoAsync(int apresentacaoId, CancellationToken cancellationToken);
         Task<Resultado> AtualizarApresentacaoAsync(int apresentacaoId, AtualizarApresentacaoSolicitacao request, CancellationToken cancellationToken);
+        Task<Resultado<IEnumerable<ApresentacaoResposta>>> ObterApresentacoesPorAutorAsync(CancellationToken cancellationToken);
     }
 }

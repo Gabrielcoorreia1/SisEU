@@ -42,6 +42,14 @@ namespace SisEUs.API.Controllers
             return HandleResult(resultado);
         }
 
+        [HttpGet("minhas-apresentacoes")]
+        [ProducesResponseType(typeof(IEnumerable<ApresentacaoResposta>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> ObterMinhasApresentacoes(CancellationToken cancellationToken)
+        {
+            var resultado = await servico.ObterApresentacoesPorAutorAsync(cancellationToken);
+            return HandleResult(resultado);
+        }
+
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

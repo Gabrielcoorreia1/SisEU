@@ -1,4 +1,5 @@
-﻿using SisEUs.Application.Eventos.DTOs.Resposta;
+﻿using SisEUs.Application.Comum.DTOs;
+using SisEUs.Application.Eventos.DTOs.Resposta;
 
 namespace SisEUs.Application.Apresentacoes.DTOs.Respostas
 {
@@ -7,7 +8,7 @@ namespace SisEUs.Application.Apresentacoes.DTOs.Respostas
         int Id,
         EventoResposta Evento,
         string Titulo,
-        string NomeAutor,
-        string NomeOrientador
+        UsuarioResposta Autor,
+        UsuarioResposta Orientador
     );
 }

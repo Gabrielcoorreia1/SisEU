@@ -9,6 +9,7 @@ using SisEUs.Application.Eventos.DTOs.Resposta;
 using SisEUs.Application.Eventos.DTOs.Solicitacoes;
 using SisEUs.Application.Eventos.Mappers;
 using SisEUs.Domain.Comum.Excecoes;
+using SisEUs.Domain.Comum.LoggedUser;
 using SisEUs.Domain.ContextoDeEvento.Entidades;
 using SisEUs.Domain.ContextoDeEvento.Interfaces;
 using SisEUs.Domain.ContextoDeEvento.ObjetosDeValor;
@@ -28,6 +29,7 @@ namespace SisEUs.Application.Eventos
         private readonly ILogger<EventoServico> _logger;
         private readonly IGeolocalizacaoValidador _geolocalizacaoValidador;
         private readonly IMapeadorDeEntidades _mapeador;
+        private readonly ILoggedUser _loggedUser;
 
         public EventoServico(
             IEventoRepositorio eventoRepositorio,
@@ -36,7 +38,8 @@ namespace SisEUs.Application.Eventos
             IApresentacaoServico servico,
             ILogger<EventoServico> logger,
             IGeolocalizacaoValidador geolocalizacaoValidador,
-            IMapeadorDeEntidades mapeador)
+            IMapeadorDeEntidades mapeador,
+            ILoggedUser loggedUser)
         {
             _eventoRepositorio = eventoRepositorio;
             _usuarioRepositorio = usuarioRepositorio;
@@ -45,6 +48,7 @@ namespace SisEUs.Application.Eventos
             _logger = logger;
             _geolocalizacaoValidador = geolocalizacaoValidador;
             _mapeador = mapeador;
+            _loggedUser = loggedUser;
         }
 
         public async Task<Resultado<EventoResposta>> CriarEventoAsync(CriarEventoSolicitacao request, CancellationToken cancellationToken)
@@ -63,6 +67,24 @@ namespace SisEUs.Application.Eventos
                 {
                     _logger.LogWarning("Tentativa de criar evento com código único duplicado: {CodigoUnico}", request.CodigoUnico);
                     return Resultado<EventoResposta>.Falha(TipoDeErro.Conflito, $"Já existe um evento com o código '{request.CodigoUnico}'.");
+                }
+
+                // Converter CPFs de avaliadores para IDs
+                var avaliadoresIds = new List<int>();
+                if (request.CpfsAvaliadores is not null && request.CpfsAvaliadores.Count > 0)
+                {
+                    var usuariosAvaliadores = await _usuarioRepositorio.ObterPorCpfsAsync(request.CpfsAvaliadores, cancellationToken);
+                    var usuariosDict = usuariosAvaliadores.ToDictionary(u => u.Cpf.Valor, u => u.Id);
+
+                    foreach (var cpf in request.CpfsAvaliadores)
+                    {
+                        if (!usuariosDict.TryGetValue(cpf, out var id))
+                        {
+                            _logger.LogWarning("Avaliador com CPF {Cpf} não encontrado", cpf);
+                            return Resultado<EventoResposta>.Falha(TipoDeErro.NaoEncontrado, $"Avaliador com CPF '{cpf}' não encontrado.");
+                        }
+                        avaliadoresIds.Add(id);
+                    }
                 }
 
                 var nomeCampus = request.Local.Campus.ToString();
@@ -94,7 +116,7 @@ namespace SisEUs.Application.Eventos
                     request.DataFim,
                     local,
                     [],
-                    request.Avaliadores ?? [],
+                    avaliadoresIds,
                     localizacao,
                     request.ImgUrl,
                     request.CodigoUnico,
@@ -156,6 +178,24 @@ namespace SisEUs.Application.Eventos
                     return Resultado.Falha(TipoDeErro.Conflito, $"Já existe outro evento com o código '{request.CodigoUnico}'.");
                 }
 
+                // Converter CPFs de avaliadores para IDs
+                var avaliadoresIds = new List<int>();
+                if (request.CpfsAvaliadores is not null && request.CpfsAvaliadores.Count > 0)
+                {
+                    var usuariosAvaliadores = await _usuarioRepositorio.ObterPorCpfsAsync(request.CpfsAvaliadores, cancellationToken);
+                    var usuariosDict = usuariosAvaliadores.ToDictionary(u => u.Cpf.Valor, u => u.Id);
+
+                    foreach (var cpf in request.CpfsAvaliadores)
+                    {
+                        if (!usuariosDict.TryGetValue(cpf, out var avaliadorId))
+                        {
+                            _logger.LogWarning("Avaliador com CPF {Cpf} não encontrado", cpf);
+                            return Resultado.Falha(TipoDeErro.NaoEncontrado, $"Avaliador com CPF '{cpf}' não encontrado.");
+                        }
+                        avaliadoresIds.Add(avaliadorId);
+                    }
+                }
+
                 evento.AtualizarTitulo(request.Titulo);
                 evento.AtualizarDataInicio(request.DataInicio);
                 evento.AtualizarDataFim(request.DataFim);
@@ -168,7 +208,7 @@ namespace SisEUs.Application.Eventos
                 evento.AtualizarImg(request.ImgUrl);
                 evento.AtualizarCodigoUnico(request.CodigoUnico);
                 evento.AtualizarTipoEvento(request.ETipoEvento);
-                evento.AtualizarAvaliadores(request.Avaliadores ?? []);
+                evento.AtualizarAvaliadores(avaliadoresIds);
 
                 await _uow.CommitAsync(cancellationToken);
 
@@ -230,13 +270,12 @@ namespace SisEUs.Application.Eventos
 
                 var resposta = await evento.ToResponseDtoAsync(_usuarioRepositorio, cancellationToken);
 
-                var apresentacoesDto = evento.Apresentacoes.Select(a => new ApresentacaoResposta(
-                    a.Id,
-                    resposta,
-                    a.Titulo.Valor,
-                    a.NomeAutor,
-                    a.NomeOrientador
-                )).ToList();
+                var apresentacoesDto = new List<ApresentacaoResposta>();
+                foreach (var apresentacao in evento.Apresentacoes)
+                {
+                    var dto = await _mapeador.MapearApresentacaoAsync(apresentacao, cancellationToken);
+                    apresentacoesDto.Add(dto);
+                }
 
                 resposta = resposta with { Apresentacoes = apresentacoesDto };
 
@@ -347,9 +386,9 @@ namespace SisEUs.Application.Eventos
             }
         }
 
-        public async Task<Resultado> AdicionarAvaliadorAsync(int avaliadorCpf, int eventoId, CancellationToken cancellationToken)
+        public async Task<Resultado> AdicionarAvaliadorAsync(string avaliadorCpf, int eventoId, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Adicionando avaliador {avaliadorCpf} ao evento {EventoId}", avaliadorCpf, eventoId);
+            _logger.LogInformation("Adicionando avaliador com CPF {AvaliadorCpf} ao evento {EventoId}", avaliadorCpf, eventoId);
 
             try
             {
@@ -361,20 +400,19 @@ namespace SisEUs.Application.Eventos
                     return Resultado.Falha(TipoDeErro.NaoEncontrado, "Evento não encontrado.");
                 }
 
-                var cpfVO = Cpf.Criar(avaliadorCpf.ToString());
-
+                var cpfVO = Cpf.Criar(avaliadorCpf);
                 var usuario = await _usuarioRepositorio.ObterPorCpfAsync(cpfVO, cancellationToken);
 
                 if (usuario is null)
                 {
-                    _logger.LogWarning("Usuário não encontrado: {AvaliadorId}", avaliadorCpf);
-                    return Resultado.Falha(TipoDeErro.NaoEncontrado, "Usuário não encontrado.");
+                    _logger.LogWarning("Usuário com CPF {AvaliadorCpf} não encontrado", avaliadorCpf);
+                    return Resultado.Falha(TipoDeErro.NaoEncontrado, $"Usuário com CPF '{avaliadorCpf}' não encontrado.");
                 }
 
                 evento.AdicionarAvaliador(usuario.Id);
                 await _uow.CommitAsync(cancellationToken);
 
-                _logger.LogInformation("Avaliador {avaliadorCpf} adicionado ao evento {EventoId} com sucesso", avaliadorCpf, eventoId);
+                _logger.LogInformation("Avaliador {AvaliadorId} adicionado ao evento {EventoId} com sucesso", usuario.Id, eventoId);
                 return Resultado.Ok();
             }
             catch (ExcecaoDeDominio ex)
@@ -389,9 +427,9 @@ namespace SisEUs.Application.Eventos
             }
         }
 
-        public async Task<Resultado> RemoverAvaliadorAsync(int avaliadorCpf, int eventoId, CancellationToken cancellationToken)
+        public async Task<Resultado> RemoverAvaliadorAsync(string avaliadorCpf, int eventoId, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Removendo avaliador {avaliadorCpf} do evento {EventoId}", avaliadorCpf, eventoId);
+            _logger.LogInformation("Removendo avaliador com CPF {AvaliadorCpf} do evento {EventoId}", avaliadorCpf, eventoId);
 
             try
             {
@@ -403,21 +441,19 @@ namespace SisEUs.Application.Eventos
                     return Resultado.Falha(TipoDeErro.NaoEncontrado, "Evento não encontrado.");
                 }
 
-                var cpfVO = Cpf.Criar(avaliadorCpf.ToString());
-
+                var cpfVO = Cpf.Criar(avaliadorCpf);
                 var usuario = await _usuarioRepositorio.ObterPorCpfAsync(cpfVO, cancellationToken);
 
                 if (usuario is null)
                 {
-                    _logger.LogWarning("Usuário não encontrado: {AvaliadorId}", avaliadorCpf);
-                    return Resultado.Falha(TipoDeErro.NaoEncontrado, "Usuário não encontrado.");
+                    _logger.LogWarning("Usuário com CPF {AvaliadorCpf} não encontrado", avaliadorCpf);
+                    return Resultado.Falha(TipoDeErro.NaoEncontrado, $"Usuário com CPF '{avaliadorCpf}' não encontrado.");
                 }
 
                 evento.RemoverAvaliador(usuario.Id);
-
                 await _uow.CommitAsync(cancellationToken);
 
-                _logger.LogInformation("Avaliador {avaliadorCpf} removido do evento {EventoId} com sucesso", avaliadorCpf, eventoId);
+                _logger.LogInformation("Avaliador {AvaliadorId} removido do evento {EventoId} com sucesso", usuario.Id, eventoId);
                 return Resultado.Ok();
             }
             catch (ExcecaoDeDominio ex)
@@ -460,6 +496,34 @@ namespace SisEUs.Application.Eventos
             {
                 _logger.LogError(ex, "Erro inesperado ao buscar evento por código");
                 return Resultado<EventoResposta>.Falha(TipoDeErro.Inesperado, "Erro interno ao buscar evento.");
+            }
+        }
+
+        public async Task<Resultado<IEnumerable<EventoResposta>>> ObterEventosPorAvaliadorAsync(CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Buscando eventos do avaliador logado");
+
+            try
+            {
+                var usuarioLogado = await _loggedUser.User();
+
+                var eventos = await _eventoRepositorio.ObterEventosPorAvaliadorIdAsync(usuarioLogado.Id, cancellationToken);
+
+                var respostas = new List<EventoResposta>();
+
+                foreach (var evento in eventos)
+                {
+                    var resposta = await evento.ToResponseDtoAsync(_usuarioRepositorio, cancellationToken);
+                    respostas.Add(resposta);
+                }
+
+                _logger.LogInformation("Encontrados {Count} eventos para o avaliador {AvaliadorId}", respostas.Count, usuarioLogado.Id);
+                return Resultado<IEnumerable<EventoResposta>>.Ok(respostas);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro inesperado ao buscar eventos do avaliador");
+                return Resultado<IEnumerable<EventoResposta>>.Falha(TipoDeErro.Inesperado, "Erro interno ao buscar eventos.");
             }
         }
     }
