@@ -12,7 +12,7 @@ namespace SisEUs.Application.Authenticacoes.Abstractions
         Task<Resultado<UsuarioResposta>> RegistrarAsync(RegistrarSolicitacao request, CancellationToken cancellationToken);
         Task<Resultado<BuscarUsuariosResposta>> BuscarPorNomeProfessorAsync(string nome, CancellationToken cancellationToken);
         Task<Resultado<UsuarioResposta>> BuscarPorIdAsync(int id, CancellationToken cancellationToken);
-        Task<Resultado<UsuarioResposta>> TornarProfessorAsync(int usuarioId, CancellationToken cancellationToken);
-        Task<Resultado<UsuarioResposta>> TornarAvaliadorAsync(int usuarioId, CancellationToken cancellationToken);
+        Task<Resultado<UsuarioResposta>> TornarProfessorAsync(int cpf, CancellationToken cancellationToken);
+        Task<Resultado<UsuarioResposta>> TornarAvaliadorAsync(int cpf, CancellationToken cancellationToken);
     }
 }
