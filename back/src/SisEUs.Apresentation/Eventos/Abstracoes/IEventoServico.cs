@@ -19,8 +19,8 @@ namespace SisEUs.Application.Eventos.Abstracoes
         Task<Resultado> AdicionarParticipanteAsync(int participanteId, int eventoId, CancellationToken cancellationToken);
 
         Task<Resultado> RemoverParticipanteAsync(int participanteId, int eventoId, CancellationToken cancellationToken);
-        Task<Resultado> AdicionarAvaliadorAsync(int avaliadorId, int eventoId, CancellationToken cancellationToken);
-        Task<Resultado> RemoverAvaliadorAsync(int avaliadorId, int eventoId, CancellationToken cancellationToken);
+        Task<Resultado> AdicionarAvaliadorAsync(int avaliadorCpf, int eventoId, CancellationToken cancellationToken);
+        Task<Resultado> RemoverAvaliadorAsync(int avaliadorCpf, int eventoId, CancellationToken cancellationToken);
         Task<Resultado<EventoResposta>> ObterPorCodigoEvento(string codigoEvento, CancellationToken cancellationToken);
     }
 }
