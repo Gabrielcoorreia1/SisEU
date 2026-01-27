@@ -105,7 +105,7 @@ namespace SisEUs.Api.Controllers
             return HandleResult(resultado);
         }
 
-        [HttpDelete("{eventoId:int}/avaliadores/{avaliadorId:int}")]
+        [HttpDelete("{eventoId:int}/avaliadores")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
