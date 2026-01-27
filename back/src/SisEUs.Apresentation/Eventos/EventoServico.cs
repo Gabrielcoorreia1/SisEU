@@ -15,6 +15,7 @@ using SisEUs.Domain.ContextoDeEvento.ObjetosDeValor;
 using SisEUs.Domain.ContextoDeEvento.Servicos;
 using SisEUs.Domain.ContextoDeUsuario.Interfaces;
 using Microsoft.Extensions.Logging;
+using SisEUs.Domain.ContextoDeUsuario.ObjetosDeValor;
 
 namespace SisEUs.Application.Eventos
 {
@@ -346,9 +347,9 @@ namespace SisEUs.Application.Eventos
             }
         }
 
-        public async Task<Resultado> AdicionarAvaliadorAsync(int avaliadorId, int eventoId, CancellationToken cancellationToken)
+        public async Task<Resultado> AdicionarAvaliadorAsync(int avaliadorCpf, int eventoId, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Adicionando avaliador {AvaliadorId} ao evento {EventoId}", avaliadorId, eventoId);
+            _logger.LogInformation("Adicionando avaliador {avaliadorCpf} ao evento {EventoId}", avaliadorCpf, eventoId);
 
             try
             {
@@ -360,18 +361,20 @@ namespace SisEUs.Application.Eventos
                     return Resultado.Falha(TipoDeErro.NaoEncontrado, "Evento não encontrado.");
                 }
 
-                var usuario = await _usuarioRepositorio.ObterPorIdAsync(avaliadorId, cancellationToken);
+                var cpfVO = Cpf.Criar(avaliadorCpf.ToString());
+
+                var usuario = await _usuarioRepositorio.ObterPorCpfAsync(cpfVO, cancellationToken);
 
                 if (usuario is null)
                 {
-                    _logger.LogWarning("Usuário não encontrado: {AvaliadorId}", avaliadorId);
+                    _logger.LogWarning("Usuário não encontrado: {AvaliadorId}", avaliadorCpf);
                     return Resultado.Falha(TipoDeErro.NaoEncontrado, "Usuário não encontrado.");
                 }
 
-                evento.AdicionarAvaliador(avaliadorId);
+                evento.AdicionarAvaliador(usuario.Id);
                 await _uow.CommitAsync(cancellationToken);
 
-                _logger.LogInformation("Avaliador {AvaliadorId} adicionado ao evento {EventoId} com sucesso", avaliadorId, eventoId);
+                _logger.LogInformation("Avaliador {avaliadorCpf} adicionado ao evento {EventoId} com sucesso", avaliadorCpf, eventoId);
                 return Resultado.Ok();
             }
             catch (ExcecaoDeDominio ex)
@@ -386,9 +389,9 @@ namespace SisEUs.Application.Eventos
             }
         }
 
-        public async Task<Resultado> RemoverAvaliadorAsync(int avaliadorId, int eventoId, CancellationToken cancellationToken)
+        public async Task<Resultado> RemoverAvaliadorAsync(int avaliadorCpf, int eventoId, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Removendo avaliador {AvaliadorId} do evento {EventoId}", avaliadorId, eventoId);
+            _logger.LogInformation("Removendo avaliador {avaliadorCpf} do evento {EventoId}", avaliadorCpf, eventoId);
 
             try
             {
@@ -400,10 +403,21 @@ namespace SisEUs.Application.Eventos
                     return Resultado.Falha(TipoDeErro.NaoEncontrado, "Evento não encontrado.");
                 }
 
-                evento.RemoverAvaliador(avaliadorId);
+                var cpfVO = Cpf.Criar(avaliadorCpf.ToString());
+
+                var usuario = await _usuarioRepositorio.ObterPorCpfAsync(cpfVO, cancellationToken);
+
+                if (usuario is null)
+                {
+                    _logger.LogWarning("Usuário não encontrado: {AvaliadorId}", avaliadorCpf);
+                    return Resultado.Falha(TipoDeErro.NaoEncontrado, "Usuário não encontrado.");
+                }
+
+                evento.RemoverAvaliador(usuario.Id);
+
                 await _uow.CommitAsync(cancellationToken);
 
-                _logger.LogInformation("Avaliador {AvaliadorId} removido do evento {EventoId} com sucesso", avaliadorId, eventoId);
+                _logger.LogInformation("Avaliador {avaliadorCpf} removido do evento {EventoId} com sucesso", avaliadorCpf, eventoId);
                 return Resultado.Ok();
             }
             catch (ExcecaoDeDominio ex)

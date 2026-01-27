@@ -99,9 +99,9 @@ namespace SisEUs.Api.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> AdicionarAvaliador(int eventoId, [FromBody] int avaliadorId, CancellationToken cancellationToken)
+        public async Task<IActionResult> AdicionarAvaliador(int eventoId, [FromBody] int avaliadorCpf, CancellationToken cancellationToken)
         {
-            var resultado = await servico.AdicionarAvaliadorAsync(avaliadorId, eventoId, cancellationToken);
+            var resultado = await servico.AdicionarAvaliadorAsync(avaliadorCpf, eventoId, cancellationToken);
             return HandleResult(resultado);
         }
 
@@ -109,9 +109,9 @@ namespace SisEUs.Api.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> RemoverAvaliador(int eventoId, int avaliadorId, CancellationToken cancellationToken)
+        public async Task<IActionResult> RemoverAvaliador(int eventoId, int avaliadorCpf, CancellationToken cancellationToken)
         {
-            var resultado = await servico.RemoverAvaliadorAsync(avaliadorId, eventoId, cancellationToken);
+            var resultado = await servico.RemoverAvaliadorAsync(avaliadorCpf, eventoId, cancellationToken);
             return HandleResult(resultado);
         }
 
