@@ -9,7 +9,7 @@ services:
       MYSQL_USER: Faca
       MYSQL_PASSWORD: Gol050219581
     ports:
-      - "3307:3306" 
+      - "3306:3306" 
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
@@ -26,6 +26,8 @@ services:
       context: ./back
       dockerfile: Dockerfile
     restart: always
+    ports:
+      - "8080:8080"
     environment:
   
       - ConnectionStrings__DefaultConnection=server=mysql;port=3306;database=siseus;user=Faca;password=Gol050219581

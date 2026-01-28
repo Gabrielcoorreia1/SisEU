@@ -1,4 +1,5 @@
-﻿using SisEUs.Application.Eventos.Mappers;
+﻿using SisEUs.Application.Comum.DTOs;
+using SisEUs.Application.Eventos.Mappers;
 using SisEUs.Application.Presencas.DTOs.Respostas;
 using SisEUs.Domain.ContextoDeEvento.Entidades;
 using SisEUs.Domain.ContextoDeEvento.Interfaces;
@@ -18,31 +19,28 @@ namespace SisEUs.Application.Presencas.Mapper
             var usuario = await usuarioRepositorio.ObterPorIdAsync(presenca.UsuarioId, cancellationToken);
             var evento = await eventoRepositorio.ObterEventoPorIdAsync(presenca.EventoId, cancellationToken);
 
-            var usuarioDto = new UsuarioResposta
-            {
-                Id = usuario?.Id ?? 0,
-                NomeCompleto = usuario?.Nome.ToString() ?? "Usuário não encontrado",
-                Cpf = usuario?.Cpf.Valor ?? "Sem cpf",
-                Email = usuario?.Email.Valor ?? "Sem email",
-            };
+            var usuarioDto = new UsuarioResposta(
+                Id: usuario?.Id ?? 0,
+                NomeCompleto: usuario?.Nome.ToString() ?? "Usuário não encontrado",
+                Cpf: usuario?.Cpf.Valor ?? "Sem cpf",
+                Email: usuario?.Email.Valor ?? "Sem email"
+            );
 
             var eventoDto = (evento != null)
                 ? await evento.ToResponseDtoAsync(usuarioRepositorio, cancellationToken)
                 : null;
 
-            return new PresencaResposta
-            {
-                Id = presenca.Id,
-                Usuario = usuarioDto,
-                Evento = eventoDto,
-                DataCheckIn = presenca.CheckIn,
-                DataCheckOut = presenca.CheckOut,
-                Localizacao = new LocalizacaoResposta
-                {
-                    Latitude = presenca.Localizacao.Latitude,
-                    Longitude = presenca.Localizacao.Longitude
-                }
-            };
+            return new PresencaResposta(
+                Id: presenca.Id,
+                Usuario: usuarioDto,
+                Evento: eventoDto,
+                DataCheckIn: presenca.CheckIn,
+                DataCheckOut: presenca.CheckOut,
+                Localizacao: new LocalizacaoResposta(
+                    Latitude: presenca.Localizacao.Latitude,
+                    Longitude: presenca.Localizacao.Longitude
+                )
+            );
         }
     }
 }

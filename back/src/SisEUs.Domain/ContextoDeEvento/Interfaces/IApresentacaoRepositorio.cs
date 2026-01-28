@@ -8,5 +8,6 @@ namespace SisEUs.Domain.ContextoDeEvento.Interfaces
         void Remover(Apresentacao apresentacao);
         Task<Apresentacao?> ObterPorIdAsync(int id, CancellationToken cancellationToken = default);
         Task<IEnumerable<Apresentacao>> ObterPorEventoIdAsync(int eventoId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Apresentacao>> ObterPorAutorIdAsync(int autorId, CancellationToken cancellationToken = default);
     }
 }

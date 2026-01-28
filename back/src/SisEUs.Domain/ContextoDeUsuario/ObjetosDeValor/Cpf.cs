@@ -1,6 +1,5 @@
 ﻿using SisEUs.Domain.Comum.Excecoes;
 using SisEUs.Domain.Comum.Sementes;
-using System.Linq;
 
 namespace SisEUs.Domain.ContextoDeUsuario.ObjetosDeValor
 {
@@ -10,7 +9,7 @@ namespace SisEUs.Domain.ContextoDeUsuario.ObjetosDeValor
         {
             Valor = valor;
         }
-        public string Valor { get; }
+        public string Valor { get; } = null!;
 
         public static Cpf Criar(string value)
         {
@@ -28,7 +27,7 @@ namespace SisEUs.Domain.ContextoDeUsuario.ObjetosDeValor
         private static bool ECpf(string cpf)
         {
             cpf = cpf.Trim().Replace(".", "").Replace("-", "");
-            
+
             if (cpf.Length != 11)
                 return false;
             if (!cpf.All(char.IsDigit) || cpf.Distinct().Count() == 1)

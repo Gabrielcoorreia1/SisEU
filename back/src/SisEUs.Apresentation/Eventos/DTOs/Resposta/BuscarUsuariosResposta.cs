@@ -1,9 +1,11 @@
-﻿using SisEUs.Application.Presencas.DTOs.Respostas;
+﻿using SisEUs.Application.Comum.DTOs;
 
 namespace SisEUs.Application.Eventos.DTOs.Resposta
 {
-    public class BuscarUsuariosResposta
-    {
-        public List<UsuarioResposta> Organizadores { get; set; }
-    }
+    /// <summary>
+    /// DTO para resposta de busca de usuários organizadores.
+    /// </summary>
+    public record BuscarUsuariosResposta(
+        List<UsuarioResposta> Organizadores
+    );
 }

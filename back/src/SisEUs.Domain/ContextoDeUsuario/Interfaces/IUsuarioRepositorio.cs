@@ -1,9 +1,5 @@
 ﻿using SisEUs.Domain.ContextoDeUsuario.Entidades;
 using SisEUs.Domain.ContextoDeUsuario.ObjetosDeValor;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using System; // Adicionado para Guid
 
 namespace SisEUs.Domain.ContextoDeUsuario.Interfaces
 {
@@ -15,7 +11,9 @@ namespace SisEUs.Domain.ContextoDeUsuario.Interfaces
         Task<bool> CpfJaExisteAsync(Cpf cpf, CancellationToken cancellationToken = default);
         Task<bool> EmailJaExisteAsync(Email email, CancellationToken cancellationToken = default);
         Task AdicionarAsync(Usuario usuario, CancellationToken cancellationToken = default);
+        void Atualizar(Usuario usuario);
         Task<Usuario?> ObterPorCpfAsync(Cpf cpf, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Usuario>> ObterPorCpfsAsync(IEnumerable<string> cpfs, CancellationToken cancellationToken = default);
         Task<IEnumerable<Usuario>> BuscarPorNomeProfessorAsync(string nome, CancellationToken cancellationToken = default);
         Task<IEnumerable<Usuario>> ObterTodosUsuariosAsync();
         Task<Usuario?> ObterPorUserIdentifierAsync(Guid userIdentifier, CancellationToken cancellationToken = default);

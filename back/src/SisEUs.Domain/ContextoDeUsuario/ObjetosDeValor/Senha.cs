@@ -15,10 +15,11 @@ namespace SisEUs.Domain.ContextoDeUsuario.ObjetosDeValor
         public static Senha Criar(string valor)
         {
             if (string.IsNullOrWhiteSpace(valor))
-                throw new ExcecaoDeDominioGenerica("Senha não pode ser nula ou vazia.");
-            if (valor.Length < 6 || valor.Length > 100) 
-                throw new ExcecaoDeDominioGenerica("Senha deve ter entre 6 e 100 caracteres.");
-            
+                throw new ExcecaoDeDominioGenerica("A senha/hash não pode ser nula ou vazia.");
+
+            if (valor.Length > 255)
+                throw new ExcecaoDeDominioGenerica("A senha excede o tamanho máximo permitido.");
+
             return new Senha(valor);
         }
     }

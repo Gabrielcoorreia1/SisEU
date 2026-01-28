@@ -1,15 +1,14 @@
-﻿namespace SisEUs.Application.Eventos.DTOs.Solicitacoes
-{
-    public class CriarLocalSolicitacao
-    {
-        public Campus Campus { get; set; }
-        public string Departamento { get; set; }
-        public string Bloco { get; set; }
-        public string Sala { get; set; }
-    }
+﻿using SisEUs.Application.Comum.Enumeracoes;
 
-    public enum Campus{
-        Fortaleza = 0,
-        Crateus = 1,
-    }
+namespace SisEUs.Application.Eventos.DTOs.Solicitacoes
+{
+    /// <summary>
+    /// DTO para criação de local de um evento.
+    /// </summary>
+    public record CriarLocalSolicitacao(
+        Campus Campus,
+        string Departamento,
+        string Bloco,
+        string Sala
+    );
 }

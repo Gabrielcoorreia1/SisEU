@@ -12,7 +12,6 @@ namespace SisEUs.Infrastructure.Configuracoes
             builder.ToTable("Apresentacoes");
             builder.HasKey(a => a.Id);
 
-            // Mapeamento único e explícito da FK
             builder.Property(a => a.EventoId).IsRequired();
             builder.HasOne(a => a.Evento)
                    .WithMany(e => e.Apresentacoes)
@@ -27,8 +26,8 @@ namespace SisEUs.Infrastructure.Configuracoes
                    .HasMaxLength(300)
                    .IsRequired();
 
-            builder.Property(a => a.NomeAutor).IsRequired(false);
-            builder.Property(a => a.NomeOrientador).IsRequired(false);
+            builder.Property(a => a.AutorId).IsRequired();
+            builder.Property(a => a.OrientadorId).IsRequired();
         }
     }
 }

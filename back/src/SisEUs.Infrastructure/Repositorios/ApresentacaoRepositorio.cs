@@ -4,36 +4,38 @@ using SisEUs.Domain.ContextoDeEvento.Interfaces;
 
 namespace SisEUs.Infrastructure.Repositorios
 {
-    public class ApresentacaoRepositorio : IApresentacaoRepositorio
+    public class ApresentacaoRepositorio(AppDbContext context) : IApresentacaoRepositorio
     {
-        private readonly AppDbContext _context;
-
-        public ApresentacaoRepositorio(AppDbContext context)
-        {
-            _context = context;
-        }
-
         public async Task AdicionarAsync(Apresentacao apresentacao, CancellationToken cancellationToken = default)
         {
-            await _context.Apresentacoes.AddAsync(apresentacao, cancellationToken);
+            await context.Apresentacoes.AddAsync(apresentacao, cancellationToken);
         }
 
         public async Task<Apresentacao?> ObterPorIdAsync(int id, CancellationToken cancellationToken = default)
         {
-            return await _context.Apresentacoes.FindAsync(new object[] { id }, cancellationToken);
+            return await context.Apresentacoes.FindAsync([id], cancellationToken);
         }
 
         public async Task<IEnumerable<Apresentacao>> ObterPorEventoIdAsync(int eventoId, CancellationToken cancellationToken = default)
         {
-            return await _context.Apresentacoes
+            return await context.Apresentacoes
                 .AsNoTracking()
                 .Where(a => a.EventoId == eventoId)
                 .ToListAsync(cancellationToken);
         }
 
+        public async Task<IEnumerable<Apresentacao>> ObterPorAutorIdAsync(int autorId, CancellationToken cancellationToken = default)
+        {
+            return await context.Apresentacoes
+                .AsNoTracking()
+                .Include(a => a.Evento)
+                .Where(a => a.AutorId == autorId)
+                .ToListAsync(cancellationToken);
+        }
+
         public void Remover(Apresentacao apresentacao)
         {
-            _context.Apresentacoes.Remove(apresentacao);
+            context.Apresentacoes.Remove(apresentacao);
         }
     }
 }

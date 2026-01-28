@@ -1,100 +1,109 @@
 using Microsoft.AspNetCore.Mvc;
-using SisEUs.API.Controllers;
 using SisEUs.API.Attributes;
-using SisEUs.Apresentation.Checkin.Abstractions;
-using System.Threading.Tasks;
-using SisEUs.Apresentation.Checkin.DTOs.Solicitacoes;
-using SisEUs.Apresentation.Checkin.DTOs.Resposta;
-using System.Security.Claims;
-using System.Security.Principal;
-using SisEUs.Application.Comum.Resultados;
-using System.Collections.Generic;
+using SisEUs.Application.Checkin.Abstraction;
+using SisEUs.Application.Checkin.DTOs.Resposta;
+using SisEUs.Application.Checkin.DTOs.Solicitacoes;
+using SisEUs.Domain.ContextoDeUsuario.Enumeracoes;
 
 namespace SisEUs.API.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class CheckinController : BaseController
+    /// <summary>
+    /// Gerenciamento de check-in e check-out com PIN
+    /// </summary>
+    [Tags("Check-in")]
+    public class CheckinController(IPinService pinService) : BaseController
     {
-        private readonly IPinService _pinService;
-
-        public CheckinController(IPinService pinService)
-        {
-            _pinService = pinService;
-        }
-
+        /// <summary>
+        /// Obtém o PIN ativo atual para check-in
+        /// </summary>
+        /// <returns>PIN ativo</returns>
         [HttpGet("pin-ativo")]
         [AuthenticatedUser]
         [ProducesResponseType(typeof(PinResposta), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetPinAtivo()
         {
-            var resultado = await _pinService.ObterPinAtivoAsync();
-            if (resultado.Sucesso)
-            {
-                return Ok(resultado.Valor);
-            }
-
+            var resultado = await pinService.ObterPinAtivoAsync();
             return HandleResult(resultado);
         }
 
-        [HttpPost("gerar-novo-pin")]
+        /// <summary>
+        /// Gera um novo PIN para check-in (apenas administradores)
+        /// </summary>
+        /// <returns>Novo PIN gerado</returns>
+        [HttpPost("pin")]
         [AuthenticatedUser]
+        [ProducesResponseType(typeof(PinResposta), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> GerarNovoPin()
         {
-            var resultado = await _pinService.GerarNovoPinAsync();
+            var resultado = await pinService.GerarNovoPinAsync();
+
+            if (resultado.Sucesso)
+            {
+                return Created($"/api/checkin/pin-ativo", resultado.Valor);
+            }
+
             return HandleResult(resultado);
         }
 
+        /// <summary>
+        /// Valida se um PIN está ativo e correto
+        /// </summary>
+        /// <param name="request">PIN a ser validado</param>
+        /// <returns>Sem conteúdo se válido</returns>
         [HttpPost("validar-pin")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> ValidarPin([FromBody] ValidarPinSolicitacao request)
         {
-            var resultado = await _pinService.ValidarApenasPinAsync(request.Pin);
+            var resultado = await pinService.ValidarApenasPinAsync(request.Pin);
             return HandleResult(resultado);
         }
 
-        [HttpGet("validar-geolocalizacao")]
+        /// <summary>
+        /// Registra o check-in do usuário com PIN e localização
+        /// </summary>
+        /// <param name="request">PIN e coordenadas de localização</param>
+        /// <returns>Confirmação de check-in registrado</returns>
+        [HttpPost("registrar")]
         [AuthenticatedUser]
-        public async Task<IActionResult> ValidarGeolocalizacao([FromQuery] string pin, [FromQuery] string latitude, [FromQuery] string longitude)
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<IActionResult> RegistrarCheckin([FromBody] RegistrarCheckinSolicitacao request)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) 
-                           ?? User.FindFirst("nameid") 
-                           ?? User.FindFirst(ClaimTypes.Sid)
-                           ?? User.FindFirst("sub")
-                           ?? User.FindFirst("id");
-
-            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int usuarioId))
-            {
-                return Unauthorized($"UsuÃ¡rio nÃ£o autenticado. ID nÃ£o encontrado no token.");
-            }
-            
-            var resultado = await _pinService.ValidarCheckinCompletoAsync(
-                pin, 
-                latitude, 
-                longitude, 
-                usuarioId
+            var resultado = await pinService.ValidarCheckinCompletoAsync(
+                request.Pin,
+                request.Latitude,
+                request.Longitude
             );
 
+            if (resultado.Sucesso)
+            {
+                return Created("/api/checkin/status", new { mensagem = "Check-in registrado com sucesso!" });
+            }
+
             return HandleResult(resultado);
         }
-        [HttpGet("registrar-checkout")]
-        [AuthenticatedUser]
-        public async Task<IActionResult> EfetuarCheckOut([FromQuery] string latitude, [FromQuery] string longitude)
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) 
-                           ?? User.FindFirst("nameid") 
-                           ?? User.FindFirst(ClaimTypes.Sid)
-                           ?? User.FindFirst("sub")
-                           ?? User.FindFirst("id");
 
-            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int usuarioId))
-            {
-                return Unauthorized($"UsuÃ¡rio nÃ£o autenticado. ID nÃ£o encontrado no token.");
-            }
-            var resultado = await _pinService.RegistrarCheckOutAsync(
-                latitude, 
-                longitude, 
-                usuarioId
+        /// <summary>
+        /// Registra o check-out do usuário com localização
+        /// </summary>
+        /// <param name="request">Coordenadas de localização</param>
+        /// <returns>Confirmação de check-out registrado</returns>
+        [HttpPost("checkout")]
+        [AuthenticatedUser]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> RegistrarCheckOut([FromBody] RegistrarCheckoutSolicitacao request)
+        {
+
+            var resultado = await pinService.RegistrarCheckOutAsync(
+                request.Latitude,
+                request.Longitude
             );
 
             if (resultado.Sucesso)
@@ -105,12 +114,17 @@ namespace SisEUs.API.Controllers
             return HandleResult(resultado);
         }
 
+        /// <summary>
+        /// Obtém o relatório completo de todos os check-ins e check-outs
+        /// </summary>
+        /// <returns>Relatório de check-ins</returns>
         [HttpGet("relatorio")]
         [AuthenticatedUser]
         [ProducesResponseType(typeof(IEnumerable<RelatorioCheckinResposta>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> ObterRelatorioCheckin()
         {
-            var resultado = await _pinService.ObterDadosRelatorioCheckinAsync();
+            var resultado = await pinService.ObterDadosRelatorioCheckinAsync();
             return HandleResult(resultado);
         }
     }

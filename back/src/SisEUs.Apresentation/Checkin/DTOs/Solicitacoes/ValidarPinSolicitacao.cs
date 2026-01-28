@@ -1,23 +1,7 @@
-// SisEUs/src/SisEUs.Apresentation/Checkin/DTOs/Solicitacoes/ValidarPinSolicitacao.cs
-
-namespace SisEUs.Apresentation.Checkin.DTOs.Solicitacoes
+namespace SisEUs.Application.Checkin.DTOs.Solicitacoes
 {
-    public class ValidarPinSolicitacao
-    {
-        /// <summary>
-        /// O PIN global inserido pelo usu√°rio.
-        /// </summary>
-        public string Pin { get; set; } = null!;
-        
-        /// <summary>
-        /// Latitude atual do dispositivo do usu√°rio.
-        /// </summary>
-        public double Latitude { get; set; }
-
-        /// <summary>
-        /// Longitude atual do dispositivo do usu√°rio.
-        /// </summary>
-        public double Longitude { get; set; }
-
-    }
+    /// <summary>
+    /// DTO para validaÁ„o de PIN de check-in.
+    /// </summary>
+    public record ValidarPinSolicitacao(string Pin);
 }
