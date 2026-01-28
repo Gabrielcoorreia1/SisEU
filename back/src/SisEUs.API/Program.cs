@@ -141,33 +141,93 @@ using (var scope = app.Services.CreateScope())
     {
         var context = services.GetRequiredService<AppDbContext>();
 
-        if (app.Environment.IsDevelopment())
+        logger.LogInformation("Verificando conexão com o banco de dados...");
+        
+        // Verifica se pode conectar ao banco
+        var canConnect = await context.Database.CanConnectAsync();
+        if (!canConnect)
         {
-            logger.LogInformation("Aplicando migrations pendentes...");
-            await context.Database.MigrateAsync();
+            logger.LogError("Não foi possível conectar ao banco de dados. Verifique a string de conexão.");
+            throw new InvalidOperationException("Não foi possível conectar ao banco de dados.");
+        }
+        
+        logger.LogInformation("Conexão estabelecida com sucesso!");
+        logger.LogInformation("Aplicando migrations pendentes...");
+        
+        var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
+        if (pendingMigrations.Any())
+        {
+            logger.LogInformation($"Encontradas {pendingMigrations.Count()} migrations pendentes:");
+            foreach (var migration in pendingMigrations)
+            {
+                logger.LogInformation($"  - {migration}");
+            }
             
-            logger.LogInformation("Verificando necessidade de seed...");
-            if (!await context.Usuarios.AnyAsync())
-            {
-                logger.LogInformation("Executando seed do banco de dados...");
-                await InitBD.SeedAsync(context);
-                logger.LogInformation("Seed concluído com sucesso!");
-            }
-            else
-            {
-                logger.LogInformation("Banco de dados já contém dados. Seed ignorado.");
-            }
+            logger.LogInformation("Aplicando migrations...");
+            await context.Database.MigrateAsync();
+            logger.LogInformation("Migrations aplicadas com sucesso!");
         }
         else
         {
-            logger.LogInformation("Aplicando migrations em produção...");
-            await context.Database.MigrateAsync();
-            logger.LogInformation("Migrations aplicadas com sucesso!");
+            logger.LogInformation("Nenhuma migration pendente encontrada.");
+        }
+
+        if (app.Environment.IsDevelopment())
+        {
+            logger.LogInformation("Verificando necessidade de seed...");
+            
+            try
+            {
+                // Verifica se há usuários no banco
+                var hasUsuarios = await context.Usuarios.AnyAsync();
+                
+                if (!hasUsuarios)
+                {
+                    logger.LogInformation("Executando seed do banco de dados...");
+                    await InitBD.SeedAsync(context);
+                    logger.LogInformation("Seed concluído com sucesso!");
+                }
+                else
+                {
+                    logger.LogInformation("Banco de dados já contém dados. Seed ignorado.");
+                }
+            }
+            catch (Exception seedEx)
+            {
+                logger.LogWarning(seedEx, "Erro ao verificar/executar seed. Continuando a aplicação...");
+            }
         }
     }
     catch (Exception ex)
     {
         logger.LogError(ex, "Erro ao inicializar o banco de dados");
+        
+        // Se for ambiente de desenvolvimento, mostra mais detalhes
+        if (app.Environment.IsDevelopment())
+        {
+            logger.LogError("Detalhes do erro: {Message}", ex.Message);
+            logger.LogError("Stack trace: {StackTrace}", ex.StackTrace);
+            
+            if (ex.InnerException != null)
+            {
+                logger.LogError("Inner exception: {InnerMessage}", ex.InnerException.Message);
+            }
+            
+            logger.LogInformation(@"
+================================================================================
+SOLUÇÃO DO PROBLEMA:
+1. Exclua o banco de dados 'siseus' no MySQL
+2. Execute os seguintes comandos no terminal:
+   cd src/SisEUs.API
+   dotnet ef database update
+   
+Ou recrie o banco manualmente com:
+   DROP DATABASE IF EXISTS siseus;
+   CREATE DATABASE siseus;
+================================================================================
+");
+        }
+        
         throw;
     }
 }
