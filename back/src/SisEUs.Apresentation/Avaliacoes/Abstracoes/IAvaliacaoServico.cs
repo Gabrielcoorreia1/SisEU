@@ -1,4 +1,5 @@
 using SisEUs.Application.Avaliacoes.DTOs.Respostas;
+using SisEUs.Application.Avaliacoes.DTOs.Solicitacoes;
 using SisEUs.Application.Comum.Resultados;
 
 namespace SisEUs.Application.Avaliacoes.Abstracoes
@@ -44,5 +45,6 @@ namespace SisEUs.Application.Avaliacoes.Abstracoes
         /// Obtém o relatório consolidado de notas e pareceres de todas as apresentações de um evento
         /// </summary>
         Task<Resultado<RelatorioEventoResposta>> ObterRelatorioEventoAsync(int eventoId, CancellationToken cancellationToken = default);
+        Task<Resultado<IEnumerable<IniciarAvaliacaoSolicitacao>>> ListarAvaliacoesPendentesAsync(CancellationToken cancellationToken = default);
     }
 }

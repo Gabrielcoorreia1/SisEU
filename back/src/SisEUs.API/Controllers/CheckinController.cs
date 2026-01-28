@@ -52,16 +52,10 @@ namespace SisEUs.API.Controllers
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<IActionResult> RegistrarCheckin([FromBody] RegistrarCheckinSolicitacao request)
         {
-            if (!TryGetUsuarioIdFromToken(out int usuarioId))
-            {
-                return Unauthorized(new { erro = "Usuário não autenticado. ID não encontrado no token." });
-            }
-
             var resultado = await pinService.ValidarCheckinCompletoAsync(
                 request.Pin,
                 request.Latitude,
-                request.Longitude,
-                usuarioId
+                request.Longitude
             );
 
             if (resultado.Sucesso)
@@ -79,15 +73,10 @@ namespace SisEUs.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> RegistrarCheckOut([FromBody] RegistrarCheckoutSolicitacao request)
         {
-            if (!TryGetUsuarioIdFromToken(out int usuarioId))
-            {
-                return Unauthorized(new { erro = "Usuário não autenticado. ID não encontrado no token." });
-            }
 
             var resultado = await pinService.RegistrarCheckOutAsync(
                 request.Latitude,
-                request.Longitude,
-                usuarioId
+                request.Longitude
             );
 
             if (resultado.Sucesso)

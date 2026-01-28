@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using SisEUs.Application.Avaliacoes.Abstracoes;
 using SisEUs.Application.Avaliacoes.DTOs.Respostas;
+using SisEUs.Application.Avaliacoes.DTOs.Solicitacoes;
 using SisEUs.Application.Comum.Resultados;
 using SisEUs.Application.Comum.UoW;
 using SisEUs.Domain.Comum.Excecoes;
@@ -385,6 +386,11 @@ namespace SisEUs.Application.Avaliacoes
                 DataInicio: avaliacao.DataInicio,
                 DataConclusao: avaliacao.DataConclusao
             );
+        }
+
+        public Task<Resultado<IEnumerable<IniciarAvaliacaoSolicitacao>>> ListarAvaliacoesPendentesAsync(CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
         }
     }
 }

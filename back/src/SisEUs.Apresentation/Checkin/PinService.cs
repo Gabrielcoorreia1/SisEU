@@ -5,6 +5,7 @@ using SisEUs.Application.Comum.Servicos;
 using SisEUs.Application.Comum.UoW;
 using SisEUs.Domain.Checkin.Entidades;
 using SisEUs.Domain.Checkin.Interfaces;
+using SisEUs.Domain.Comum.LoggedUser;
 using SisEUs.Domain.ContextoDeUsuario.Interfaces;
 using EntidadeCheckin = SisEUs.Domain.Checkin.Entidades.Checkin;
 
@@ -15,7 +16,8 @@ namespace SisEUs.Application.Checkin
         IUoW uow,
         ICheckinRepositorio checkinRepositorio,
         IUsuarioRepositorio usuarioRepositorio,
-        IValidadorDeCoordenadas validadorDeCoordenadas) : IPinService
+        IValidadorDeCoordenadas validadorDeCoordenadas,
+        ILoggedUser loggedUser) : IPinService
     {
 
         public async Task<Resultado<PinResposta>> GerarNovoPinAsync()
@@ -76,8 +78,10 @@ namespace SisEUs.Application.Checkin
             return Resultado.Ok();
         }
 
-        public async Task<Resultado> ValidarCheckinCompletoAsync(string pin, string latitude, string longitude, int usuarioId)
+        public async Task<Resultado> ValidarCheckinCompletoAsync(string pin, string latitude, string longitude)
         {
+            var usuarioAtual = await loggedUser.User();
+
             // Validar e converter coordenadas usando o serviço centralizado
             var resultadoCoordenadas = validadorDeCoordenadas.TryConverterCoordenadas(latitude, longitude, out double latDouble, out double lonDouble);
             if (!resultadoCoordenadas.Sucesso)
@@ -99,14 +103,14 @@ namespace SisEUs.Application.Checkin
                 return Resultado.Falha(TipoDeErro.Validacao, "Falha no check-in: PIN inválido ou expirado.");
             }
 
-            var checkinAberto = await checkinRepositorio.ObterCheckinAbertoAsync(usuarioId);
+            var checkinAberto = await checkinRepositorio.ObterCheckinAbertoAsync(usuarioAtual.Id);
 
             if (checkinAberto != null)
             {
                 return Resultado.Falha(TipoDeErro.Validacao, "Você já registrou o Check-in. Por favor, faça o Check-out.");
             }
 
-            var novoCheckin = EntidadeCheckin.Criar(usuarioId, pinAtivo.Id, latDouble, lonDouble);
+            var novoCheckin = EntidadeCheckin.Criar(usuarioAtual.Id, pinAtivo.Id, latDouble, lonDouble);
 
             checkinRepositorio.Adicionar(novoCheckin);
             await uow.CommitAsync();
@@ -114,8 +118,10 @@ namespace SisEUs.Application.Checkin
             return Resultado.Ok();
         }
 
-        public async Task<Resultado> RegistrarCheckOutAsync(string latitude, string longitude, int usuarioId)
+        public async Task<Resultado> RegistrarCheckOutAsync(string latitude, string longitude)
         {
+            var usuarioAtual = await loggedUser.User();
+
             // Validar e converter coordenadas usando o serviço centralizado
             var resultadoCoordenadas = validadorDeCoordenadas.TryConverterCoordenadas(latitude, longitude, out double latDouble, out double lonDouble);
             if (!resultadoCoordenadas.Sucesso)
@@ -130,7 +136,7 @@ namespace SisEUs.Application.Checkin
                 return Resultado.Falha(TipoDeErro.Validacao, "Você não está na área permitida para Check-out.");
             }
 
-            var checkinAberto = await checkinRepositorio.ObterCheckinAbertoAsync(usuarioId);
+            var checkinAberto = await checkinRepositorio.ObterCheckinAbertoAsync(usuarioAtual.Id);
 
             if (checkinAberto == null)
             {

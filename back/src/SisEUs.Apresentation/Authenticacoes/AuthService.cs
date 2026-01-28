@@ -149,11 +149,12 @@ namespace SisEUs.Application.Authenticacoes
             ));
         }
 
-        public async Task<Resultado<UsuarioResposta>> TornarProfessorAsync(int usuarioId, CancellationToken cancellationToken)
+        public async Task<Resultado<UsuarioResposta>> TornarProfessorAsync(int cpf, CancellationToken cancellationToken)
         {
+            var cpfVO = Cpf.Criar(cpf.ToString());
             try
             {
-                var usuario = await usuarioRepositorio.ObterPorIdAsync(usuarioId, cancellationToken);
+                var usuario = await usuarioRepositorio.ObterPorCpfAsync(cpfVO, cancellationToken);
 
                 if (usuario is null)
                     return Resultado<UsuarioResposta>.Falha(TipoDeErro.NaoEncontrado, "Usuário não encontrado.");
@@ -176,11 +177,12 @@ namespace SisEUs.Application.Authenticacoes
             }
         }
 
-        public async Task<Resultado<UsuarioResposta>> TornarAvaliadorAsync(int usuarioId, CancellationToken cancellationToken)
+        public async Task<Resultado<UsuarioResposta>> TornarAvaliadorAsync(int cpf, CancellationToken cancellationToken)
         {
+            var cpfVO = Cpf.Criar(cpf.ToString());
             try
             {
-                var usuario = await usuarioRepositorio.ObterPorIdAsync(usuarioId, cancellationToken);
+                var usuario = await usuarioRepositorio.ObterPorCpfAsync(cpfVO, cancellationToken);
 
                 if (usuario is null)
                     return Resultado<UsuarioResposta>.Falha(TipoDeErro.NaoEncontrado, "Usuário não encontrado.");

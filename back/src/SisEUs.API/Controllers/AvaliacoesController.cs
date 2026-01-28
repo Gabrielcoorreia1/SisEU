@@ -95,6 +95,16 @@ namespace SisEUs.API.Controllers
             return HandleResult(resultado);
         }
 
+        [HttpGet("avaliacoes-pendentes")]
+        [ProducesResponseType(typeof(IEnumerable<IniciarAvaliacaoSolicitacao>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> ListarAvaliacoesPendentes(CancellationToken cancellationToken)
+        {
+            var resultado = await servico.ListarAvaliacoesPendentesAsync(cancellationToken);
+            return HandleResult(resultado);
+        }
+
+
         [HttpGet("relatorio/evento/{eventoId:int}")]
         [ProducesResponseType(typeof(RelatorioEventoResposta), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
