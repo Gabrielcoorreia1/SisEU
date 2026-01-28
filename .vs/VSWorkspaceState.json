@@ -1,10 +1,15 @@
 {
   "ExpandedNodes": [
     "",
-    "\\front",
-    "\\front\\seu",
-    "\\front\\seu\\src"
+    "\\back",
+    "\\back\\src",
+    "\\back\\src\\SisEUs.Apresentation",
+    "\\back\\src\\SisEUs.Apresentation\\Eventos",
+    "\\back\\src\\SisEUs.Apresentation\\Eventos\\DTOs",
+    "\\back\\src\\SisEUs.Apresentation\\Eventos\\DTOs\\Solicitacoes",
+    "\\back\\src\\SisEUs.Domain",
+    "\\back\\src\\SisEUs.Domain\\ContextoDeEvento",
+    "\\back\\src\\SisEUs.Domain\\ContextoDeEvento\\Entidades"
   ],
-  "SelectedNode": "\\front\\seu\\src",
   "PreviewInSolutionExplorer": false
 }

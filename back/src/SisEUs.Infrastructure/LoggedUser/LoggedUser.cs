@@ -18,14 +18,26 @@ namespace SisEUs.Infrastructure.LoggedUser
 
             var jwtSecurityToken = tokenHandler.ReadJwtToken(token);
 
-            var identifier = jwtSecurityToken.Claims.First(c => c.Type == ClaimTypes.Sid).Value;
+            var identifierClaim = jwtSecurityToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Sid);
+            if (identifierClaim == null)
+            {
+                throw new UnauthorizedAccessException("Token inválido: Claim SID não encontrado.");
+            }
 
+            var identifier = identifierClaim.Value;
             var userIdentifier = Guid.Parse(identifier);
 
-            return await context
+            var user = await context
                 .Usuarios
                 .AsNoTracking()
-                .FirstAsync(user => user.UserIdentifier == userIdentifier);
+                .FirstOrDefaultAsync(user => user.UserIdentifier == userIdentifier);
+
+            if (user == null)
+            {
+                throw new UnauthorizedAccessException($"Usuário não encontrado para o identificador: {userIdentifier}");
+            }
+
+            return user;
         }
     }
 }
