@@ -1,0 +1,16 @@
+*   [33m9e5e27d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Merge upstream/main - Sincronizar com repositorio original
+[31m|[m[32m\[m  
+[31m|[m *   [33mc48d5da[m[33m ([m[1;31mupstream/main[m[33m)[m Merge pull request #5 from Gabrielcoorreia1/main
+[31m|[m [33m|[m[34m\[m  
+* [33m|[m [34m|[m [33m737eed0[m fix: Adicionar scripts de rebuild do Docker e melhorar documentacao de troubleshooting
+[34m|[m [33m|[m[34m/[m  
+[34m|[m[34m/[m[33m|[m   
+* [33m|[m [33med780f6[m Merge branch 'main' into main
+[35m|[m[33m\[m[33m|[m 
+[35m|[m * [33m549c4d7[m fix
+[35m|[m * [33m7828ea2[m fix
+[35m|[m * [33m5a2a70d[m fix
+[35m|[m * [33me542994[m fix(migrations): mysql table presenca no exist
+[35m|[m * [33m45558f9[m fix(user): Cpf error memory
+[35m|[m *   [33m86756e6[m fix merge
+[35m|[m [1;31m|[m[1;32m\[m  

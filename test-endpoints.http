@@ -1,0 +1,79 @@
+### Teste 1: Listar eventos SEM autenticação (deve funcionar - AllowAnonymous)
+GET http://localhost:8080/api/eventos
+Content-Type: application/json
+
+###
+
+### Teste 2: Obter evento por ID SEM autenticação (deve funcionar - AllowAnonymous)
+GET http://localhost:8080/api/eventos/1
+Content-Type: application/json
+
+###
+
+### Teste 3: Buscar evento por código SEM autenticação (deve funcionar - AllowAnonymous)
+GET http://localhost:8080/api/eventos/por-codigo?codigo=I1HGF9
+Content-Type: application/json
+
+###
+
+### Teste 4: Login para obter token
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ana.lima@siseus.com",
+  "senha": "Senha@123"
+}
+
+###
+
+### Teste 5: Listar eventos COM autenticação (deve funcionar)
+GET http://localhost:8080/api/eventos
+Content-Type: application/json
+Authorization: Bearer SEU_TOKEN_AQUI
+
+###
+
+### Teste 6: Criar evento (requer autenticação)
+POST http://localhost:8080/api/eventos
+Content-Type: application/json
+Authorization: Bearer SEU_TOKEN_AQUI
+
+{
+  "titulo": "Teste de Evento",
+  "dataInicio": "2026-02-15T08:00:00",
+  "dataFim": "2026-02-15T18:00:00",
+  "local": {
+    "campus": 1,
+    "departamento": "TI",
+    "bloco": "A",
+    "sala": "101"
+  },
+  "eTipoEvento": 1,
+  "codigoUnico": "TEST01",
+  "imgUrl": "",
+  "cpfsAvaliadores": []
+}
+
+###
+
+### Teste 7: Atualizar evento (requer autenticação)
+PUT http://localhost:8080/api/eventos/1
+Content-Type: application/json
+Authorization: Bearer SEU_TOKEN_AQUI
+
+{
+  "titulo": "Evento Atualizado",
+  "dataInicio": "2026-02-15T08:00:00",
+  "dataFim": "2026-02-15T18:00:00",
+  "local": {
+    "campus": 1,
+    "departamento": "TI",
+    "bloco": "A",
+    "sala": "101"
+  },
+  "eTipoEvento": 1,
+  "codigoUnico": "I1HGF9",
+  "imgUrl": "",
+  "cpfsAvaliadores": []
+}

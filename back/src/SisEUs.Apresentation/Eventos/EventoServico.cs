@@ -1,5 +1,6 @@
 ﻿using SisEUs.Application.Apresentacoes.Abstractions;
 using SisEUs.Application.Apresentacoes.DTOs.Respostas;
+using SisEUs.Application.Apresentacoes.DTOs.Solicitacoes;
 using SisEUs.Application.Comum.Mapeamento;
 using SisEUs.Application.Comum.Resultados;
 using SisEUs.Application.Comum.UoW;
@@ -198,6 +199,32 @@ namespace SisEUs.Application.Eventos
                 evento.AtualizarAvaliadores(avaliadoresIds);
 
                 await _uow.CommitAsync(cancellationToken);
+
+                // Processar apresentações se fornecidas
+                if (request.Apresentacoes is not null && request.Apresentacoes.Count > 0)
+                {
+                    _logger.LogInformation("Atualizando {Count} apresentações do evento {EventoId}", request.Apresentacoes.Count, id);
+                    
+                    foreach (var apresentacaoRequest in request.Apresentacoes)
+                    {
+                        // Se a apresentação tem ID, atualiza; senão, cria nova
+                        if (apresentacaoRequest.Id.HasValue && apresentacaoRequest.Id.Value > 0)
+                        {
+                            var atualizarSolicitacao = new AtualizarApresentacaoSolicitacao(
+                                Id: (int)apresentacaoRequest.Id.Value,
+                                Titulo: apresentacaoRequest.Titulo,
+                                CpfAutor: apresentacaoRequest.CpfAutor,
+                                CpfOrientador: apresentacaoRequest.CpfOrientador
+                            );
+                            await _servico.AtualizarApresentacaoAsync((int)apresentacaoRequest.Id.Value, atualizarSolicitacao, cancellationToken);
+                        }
+                        else
+                        {
+                            var novaSolicitacao = apresentacaoRequest with { EventoId = id };
+                            await _servico.CriarApresentacaoAsync(novaSolicitacao, cancellationToken);
+                        }
+                    }
+                }
 
                 _logger.LogInformation("Evento atualizado com sucesso: {EventoId}", id);
                 return Resultado.Ok();

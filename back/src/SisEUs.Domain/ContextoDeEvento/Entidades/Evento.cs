@@ -161,5 +161,10 @@ namespace SisEUs.Domain.ContextoDeEvento.Entidades
         {
             AvaliadoresIds = [.. novosAvaliadores.Distinct()];
         }
+
+        public void AtualizarApresentacoes(IEnumerable<Apresentacao> novasApresentacoes)
+        {
+            Apresentacoes = [.. novasApresentacoes];
+        }
     }
 }

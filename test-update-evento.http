@@ -1,0 +1,236 @@
+### ========================================
+### TESTES DE ATUALIZAÇÃO DE EVENTO
+### ========================================
+
+### PASSO 1: Login para obter token
+# @name login
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ana.lima@siseus.com",
+  "senha": "Senha@123"
+}
+
+###
+
+### PASSO 2: Obter evento ANTES da atualização (para comparação)
+# @name getEventoBefore
+GET http://localhost:8080/api/eventos/1
+Content-Type: application/json
+
+###
+
+### PASSO 3: Atualizar evento com TÍTULO modificado
+# @name updateEvento
+PUT http://localhost:8080/api/eventos/1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhbmEubGltYUBzaXNldXMuY29tIiwibmFtZSI6IkFuYSBMaW1hIiwicm9sZSI6IkFkbWluaXN0cmFkb3IiLCJqdGkiOiJiNDY5ZWE0Zi02YjE1LTQ1NjAtODdjMy1mNzZhYjY2OWYyZDEiLCJleHAiOjE3Mzc2MDI5NTAsImlzcyI6IlNpc0VVcy5BUEkiLCJhdWQiOiJTaXNFVXMuQVBJIn0.uvqgYQXwDl--cZUd6G_5L7oLpRkqrXmgQdnS7fxF4C4
+
+{
+  "id": 1,
+  "titulo": "Evento Atualizado - Teste de Persistência",
+  "dataInicio": "2025-03-15T08:00:00",
+  "dataFim": "2025-03-15T18:00:00",
+  "local": {
+    "campus": 0,
+    "departamento": "Departamento de Computação",
+    "bloco": "B",
+    "sala": "201"
+  },
+  "eTipoEvento": 1,
+  "codigoUnico": "I1HGF9",
+  "imgUrl": "https://exemplo.com/imagem-atualizada.jpg",
+  "cpfsAvaliadores": ["12345678900", "98765432100"],
+  "apresentacoes": []
+}
+
+###
+
+### PASSO 4: Obter evento DEPOIS da atualização (para verificar se salvou)
+# @name getEventoAfter
+GET http://localhost:8080/api/eventos/1
+Content-Type: application/json
+
+###
+
+### PASSO 5: Verificar se mudanças persistem após reiniciar (aguardar alguns segundos)
+# Este teste deve ser executado manualmente após alguns segundos
+GET http://localhost:8080/api/eventos/1
+Content-Type: application/json
+
+###
+
+### ========================================
+### TESTE 2: Atualização com Apresentações
+### ========================================
+
+### Atualizar evento adicionando apresentações
+PUT http://localhost:8080/api/eventos/1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhbmEubGltYUBzaXNldXMuY29tIiwibmFtZSI6IkFuYSBMaW1hIiwicm9sZSI6IkFkbWluaXN0cmFkb3IiLCJqdGkiOiJiNDY5ZWE0Zi02YjE1LTQ1NjAtODdjMy1mNzZhYjY2OWYyZDEiLCJleHAiOjE3Mzc2MDI5NTAsImlzcyI6IlNpc0VVcy5BUEkiLCJhdWQiOiJTaXNFVXMuQVBJIn0.uvqgYQXwDl--cZUd6G_5L7oLpRkqrXmgQdnS7fxF4C4
+
+{
+  "id": 1,
+  "titulo": "Evento com Apresentações Atualizadas",
+  "dataInicio": "2025-03-15T08:00:00",
+  "dataFim": "2025-03-15T18:00:00",
+  "local": {
+    "campus": 0,
+    "departamento": "Departamento de Computação",
+    "bloco": "B",
+    "sala": "201"
+  },
+  "eTipoEvento": 1,
+  "codigoUnico": "I1HGF9",
+  "imgUrl": "https://exemplo.com/imagem.jpg",
+  "cpfsAvaliadores": ["12345678900"],
+  "apresentacoes": [
+    {
+      "titulo": "Nova Apresentação de Teste",
+      "cpfAutor": "12345678900",
+      "cpfOrientador": "98765432100",
+      "eventoId": 1
+    }
+  ]
+}
+
+###
+
+### Verificar evento com apresentações
+GET http://localhost:8080/api/eventos/1
+Content-Type: application/json
+
+###
+
+### ========================================
+### TESTE 3: Atualização de Múltiplos Campos
+### ========================================
+
+### Atualizar evento modificando vários campos
+PUT http://localhost:8080/api/eventos/1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhbmEubGltYUBzaXNldXMuY29tIiwibmFtZSI6IkFuYSBMaW1hIiwicm9sZSI6IkFkbWluaXN0cmFkb3IiLCJqdGkiOiJiNDY5ZWE0Zi02YjE1LTQ1NjAtODdjMy1mNzZhYjY2OWYyZDEiLCJleHAiOjE3Mzc2MDI5NTAsImlzcyI6IlNpc0VVcy5BUEkiLCJhdWQiOiJTaXNFVXMuQVBJIn0.uvqgYQXwDl--cZUd6G_5L7oLpRkqrXmgQdnS7fxF4C4
+
+{
+  "id": 1,
+  "titulo": "Feira de Ciências e Tecnologia 2025 - ATUALIZADO",
+  "dataInicio": "2025-04-20T09:00:00",
+  "dataFim": "2025-04-20T17:00:00",
+  "local": {
+    "campus": 0,
+    "departamento": "Departamento de Tecnologia da Informação",
+    "bloco": "C",
+    "sala": "Lab 305"
+  },
+  "eTipoEvento": 2,
+  "codigoUnico": "I1HGF9",
+  "imgUrl": "https://exemplo.com/feira-ciencias-2025.jpg",
+  "cpfsAvaliadores": ["12345678900", "98765432100", "11122233344"],
+  "apresentacoes": []
+}
+
+###
+
+### Verificar todas as mudanças
+GET http://localhost:8080/api/eventos/1
+Content-Type: application/json
+
+###
+
+### ========================================
+### TESTE 4: Validação de Erros
+### ========================================
+
+### Tentar atualizar com código único duplicado (deve falhar)
+PUT http://localhost:8080/api/eventos/1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhbmEubGltYUBzaXNldXMuY29tIiwibmFtZSI6IkFuYSBMaW1hIiwicm9sZSI6IkFkbWluaXN0cmFkb3IiLCJqdGkiOiJiNDY5ZWE0Zi02YjE1LTQ1NjAtODdjMy1mNzZhYjY2OWYyZDEiLCJleHAiOjE3Mzc2MDI5NTAsImlzcyI6IlNpc0VVcy5BUEkiLCJhdWQiOiJTaXNFVXMuQVBJIn0.uvqgYQXwDl--cZUd6G_5L7oLpRkqrXmgQdnS7fxF4C4
+
+{
+  "id": 1,
+  "titulo": "Teste",
+  "dataInicio": "2025-03-15T08:00:00",
+  "dataFim": "2025-03-15T18:00:00",
+  "local": {
+    "campus": 0,
+    "departamento": "TI",
+    "bloco": "A",
+    "sala": "101"
+  },
+  "eTipoEvento": 1,
+  "codigoUnico": "OUTRO_CODIGO_EXISTENTE",
+  "imgUrl": "",
+  "cpfsAvaliadores": [],
+  "apresentacoes": []
+}
+
+###
+
+### Tentar atualizar evento inexistente (deve retornar 404)
+PUT http://localhost:8080/api/eventos/9999
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhbmEubGltYUBzaXNldXMuY29tIiwibmFtZSI6IkFuYSBMaW1hIiwicm9sZSI6IkFkbWluaXN0cmFkb3IiLCJqdGkiOiJiNDY5ZWE0Zi02YjE1LTQ1NjAtODdjMy1mNzZhYjY2OWYyZDEiLCJleHAiOjE3Mzc2MDI5NTAsImlzcyI6IlNpc0VVcy5BUEkiLCJhdWQiOiJTaXNFVXMuQVBJIn0.uvqgYQXwDl--cZUd6G_5L7oLpRkqrXmgQdnS7fxF4C4
+
+{
+  "id": 9999,
+  "titulo": "Evento Inexistente",
+  "dataInicio": "2025-03-15T08:00:00",
+  "dataFim": "2025-03-15T18:00:00",
+  "local": {
+    "campus": 0,
+    "departamento": "TI",
+    "bloco": "A",
+    "sala": "101"
+  },
+  "eTipoEvento": 1,
+  "codigoUnico": "INEXIST",
+  "imgUrl": "",
+  "cpfsAvaliadores": [],
+  "apresentacoes": []
+}
+
+###
+
+### Tentar atualizar com data fim antes da data início (deve falhar)
+PUT http://localhost:8080/api/eventos/1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhbmEubGltYUBzaXNldXMuY29tIiwibmFtZSI6IkFuYSBMaW1hIiwicm9sZSI6IkFkbWluaXN0cmFkb3IiLCJqdGkiOiJiNDY5ZWE0Zi02YjE1LTQ1NjAtODdjMy1mNzZhYjY2OWYyZDEiLCJleHAiOjE3Mzc2MDI5NTAsImlzcyI6IlNpc0VVcy5BUEkiLCJhdWQiOiJTaXNFVXMuQVBJIn0.uvqgYQXwDl--cZUd6G_5L7oLpRkqrXmgQdnS7fxF4C4
+
+{
+  "id": 1,
+  "titulo": "Teste Data Inválida",
+  "dataInicio": "2025-03-15T18:00:00",
+  "dataFim": "2025-03-15T08:00:00",
+  "local": {
+    "campus": 0,
+    "departamento": "TI",
+    "bloco": "A",
+    "sala": "101"
+  },
+  "eTipoEvento": 1,
+  "codigoUnico": "I1HGF9",
+  "imgUrl": "",
+  "cpfsAvaliadores": [],
+  "apresentacoes": []
+}
+
+###
+
+### ========================================
+### TESTE 5: Verificação no Banco de Dados
+### ========================================
+### Para verificar se realmente salvou no banco, execute este teste
+### após reiniciar o container Docker
+
+### Verificar evento após reinicialização do container
+GET http://localhost:8080/api/eventos/1
+Content-Type: application/json
+
+###
+
+### Listar todos os eventos para verificar mudanças
+GET http://localhost:8080/api/eventos?pagina=1&tamanho=20
+Content-Type: application/json
+
+###
