@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SisEUs.API.Attributes;
 using SisEUs.API.Controllers;
 using SisEUs.Application.Eventos.Abstracoes;
@@ -12,7 +13,6 @@ namespace SisEUs.Api.Controllers
     /// <summary>
     /// Gerenciamento de eventos acadêmicos (sessões de apresentação)
     /// </summary>
-    [AuthenticatedUser]
     [Tags("Eventos")]
     public class EventosController(IEventoServico servico, ILoggedUser loggedUser) : BaseController
     {
@@ -23,6 +23,7 @@ namespace SisEUs.Api.Controllers
         /// <param name="cancellationToken">Token de cancelamento</param>
         /// <returns>Evento criado</returns>
         [HttpPost]
+        [AuthenticatedUser]
         [ProducesResponseType(typeof(EventoResposta), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
@@ -217,7 +218,6 @@ namespace SisEUs.Api.Controllers
         /// <param name="cancellationToken">Token de cancelamento</param>
         /// <returns>Lista de eventos do avaliador</returns>
         [HttpGet("avaliador/{avaliadorId:int}/eventos")]
-        [AuthorizeRoles(ETipoUsuario.Admin, ETipoUsuario.Professor)]
         [ProducesResponseType(typeof(IEnumerable<EventoResposta>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> ObterEventosPorAvaliador(int avaliadorId, CancellationToken cancellationToken)
