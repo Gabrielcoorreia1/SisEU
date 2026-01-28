@@ -1,41 +1,80 @@
 # Guia de Solução de Problemas - Docker
 
-## Problema Resolvido
+## ?? PROBLEMA PRINCIPAL RESOLVIDO
 
-Este projeto tinha problemas ao executar via Docker onde o banco de dados (MySQL) não estava completamente pronto quando a API tentava se conectar, resultando em erros de tabelas não encontradas ou migrações falhadas.
+**O problema principal era que o código estava configurado para usar SQLite em vez de MySQL!**
+
+### Correções Aplicadas:
+
+1. ? **InjecaoDependencia.cs** - Alterado de `UseSqlite` para `UseMySql` com Pomelo
+2. ? **AppDbContextFactory.cs** - Alterado para usar MySQL
+3. ? **SisEUs.Infrastructure.csproj** - Substituído `Microsoft.EntityFrameworkCore.Sqlite` por `Pomelo.EntityFrameworkCore.MySql`
+4. ? **Connection String** - Agora usa `DefaultConnection` em vez de `conexao` (que não existia)
+
+---
+
+## Problema Original
+
+Este projeto tinha problemas ao executar via Docker onde:
+- O código estava configurado para **SQLite** mas o Docker usa **MySQL**
+- A connection string estava errada (`conexao` em vez de `DefaultConnection`)
+- O banco de dados (MySQL) não estava completamente pronto quando a API tentava se conectar
+- Erros de tabelas não encontradas ou migrações falhadas
 
 ## Soluções Implementadas
 
-### 1. **docker-compose.yml**
+### 1. **Correção do Provedor de Banco de Dados** ? PRINCIPAL
+- ? Alterado de SQLite para MySQL (Pomelo) em `InjecaoDependencia.cs`
+- ? Corrigido `AppDbContextFactory.cs` para usar MySQL
+- ? Adicionado pacote `Pomelo.EntityFrameworkCore.MySql` versão 8.0.0
+- ? Removido pacote `Microsoft.EntityFrameworkCore.Sqlite`
+- ? Connection string corrigida para usar `DefaultConnection`
+
+### 2. **docker-compose.yml**
 - ? Adicionado `start_period: 30s` ao healthcheck do MySQL
 - ? Aumentado o número de `retries` de 5 para 10
 - ? Exposta a porta 8080 da API no docker-compose
 
-### 2. **Program.cs**
+### 3. **Program.cs**
 - ? Implementado retry logic com 30 tentativas
 - ? Aguarda 3 segundos entre cada tentativa
 - ? Aguarda mais 2 segundos após conexão bem-sucedida para garantir que o banco está completamente pronto
 - ? Usa `CanConnectAsync()` para testar a conexão antes de executar migrations
 - ? Logs detalhados para facilitar o debug
 
-### 3. **Dockerfile**
+### 4. **Dockerfile**
 - ? Dockerfile simplificado e otimizado
 - ? Confia no retry logic robusto implementado no código C#
 
 ## Como Usar
 
-### Limpar containers e volumes antigos (IMPORTANTE)
+### Opção 1: Usar o Script Automatizado (RECOMENDADO)
+
+**Windows:**
+```bash
+rebuild-docker.bat
+```
+
+**Linux/Mac:**
+```bash
+chmod +x rebuild-docker.sh
+./rebuild-docker.sh
+```
+
+### Opção 2: Comandos Manuais
+
+#### Limpar containers e volumes antigos (IMPORTANTE)
 ```bash
 docker-compose down -v
 ```
 
-### Construir e iniciar os containers (sem cache)
+#### Construir e iniciar os containers (sem cache)
 ```bash
 docker-compose build --no-cache
 docker-compose up
 ```
 
-### Ou construir e iniciar em um único comando
+#### Ou construir e iniciar em um único comando
 ```bash
 docker-compose up --build --force-recreate
 ```
@@ -57,9 +96,28 @@ docker logs -f siseus-db
 docker exec -it siseus-db mysql -uFaca -pGol050219581 -e "SHOW DATABASES;"
 ```
 
-### Verificar se as tabelas foram criadas
+### Verificar se as tabelas foram criadas ?
 ```bash
 docker exec -it siseus-db mysql -uFaca -pGol050219581 siseus -e "SHOW TABLES;"
+```
+
+Você deve ver algo como:
+```
++-------------------+
+| Tables_in_siseus  |
++-------------------+
+| Apresentacoes     |
+| CheckinPins       |
+| Checkins          |
+| Presencas         |
+| Sessoes           |
+| Usuarios          |
++-------------------+
+```
+
+### Verificar dados mockados
+```bash
+docker exec -it siseus-db mysql -uFaca -pGol050219581 siseus -e "SELECT * FROM Usuarios;"
 ```
 
 ### Acessar a API
@@ -109,14 +167,29 @@ http://localhost:8080/swagger
    docker-compose restart api
    ```
 
+6. **Verifique se a API está usando MySQL:**
+   ```bash
+   docker logs siseus-api 2>&1 | grep -i mysql
+   ```
+
 ## O Que Foi Corrigido
 
-### Problema Original
+### Problema Original #1 - SQLite vs MySQL ? PRINCIPAL
+- O código estava usando `UseSqlite` mas o Docker tinha MySQL
+- Connection string errada (`conexao` não existia)
+- Pacote errado instalado (SQLite em vez de Pomelo MySQL)
+
+**Solução:**
+- Substituído SQLite por MySQL (Pomelo) em todos os lugares
+- Corrigida a connection string para usar `DefaultConnection`
+- Instalado o pacote correto `Pomelo.EntityFrameworkCore.MySql`
+
+### Problema Original #2 - Timing de Inicialização
 - A API tentava conectar ao MySQL imediatamente após o container subir
 - O MySQL precisava de alguns segundos extras para aceitar conexões e processar comandos DDL
 - Erros de "tabela não existe" ou "migração falhou"
 
-### Solução Implementada
+**Solução:**
 - **30 tentativas** com intervalo de 3 segundos (até 90 segundos de espera)
 - Delay adicional de 2 segundos após conexão bem-sucedida
 - Healthcheck robusto no docker-compose
@@ -129,6 +202,7 @@ http://localhost:8080/swagger
 - Em produção, considere usar Migrations do Entity Framework em vez de `EnsureCreated()`
 - O MySQL está exposto na porta **3307** do host (não 3306) para evitar conflitos com MySQL local
 - A API aguarda até **90 segundos** para o MySQL ficar pronto antes de falhar
+- **IMPORTANTE**: Agora o projeto usa MySQL em TODOS os ambientes (local e Docker)
 
 ## Portas Utilizadas
 
@@ -160,3 +234,22 @@ docker exec -it siseus-db mysql -uFaca -pGol050219581 siseus
 
 # Rebuild completo
 docker-compose down -v && docker-compose build --no-cache && docker-compose up
+
+# Ver query de criação de uma tabela
+docker exec -it siseus-db mysql -uFaca -pGol050219581 siseus -e "SHOW CREATE TABLE Usuarios;"
+
+# Contar registros em uma tabela
+docker exec -it siseus-db mysql -uFaca -pGol050219581 siseus -e "SELECT COUNT(*) FROM Usuarios;"
+```
+
+## Diferenças entre Ambiente Local e Docker
+
+### Antes da Correção:
+- ? Local: SQLite
+- ? Docker: MySQL
+- ? Problema: Inconsistência causava erros
+
+### Depois da Correção:
+- ? Local: MySQL (localhost:3306)
+- ? Docker: MySQL (mysql:3306 dentro da rede Docker)
+- ? Ambos usam o mesmo código e configurações

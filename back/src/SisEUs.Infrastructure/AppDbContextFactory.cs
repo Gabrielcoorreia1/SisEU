@@ -11,6 +11,7 @@ namespace SisEUs.Infrastructure
         {
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
 
+            // Configuração para ler a string de conexão
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
