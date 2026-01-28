@@ -5,6 +5,7 @@ using SisEUs.Application.Comum.Mapeamento;
 using SisEUs.Application.Comum.Resultados;
 using SisEUs.Application.Comum.UoW;
 using SisEUs.Domain.Comum.Excecoes;
+using SisEUs.Domain.Comum.LoggedUser;
 using SisEUs.Domain.ContextoDeEvento.Entidades;
 using SisEUs.Domain.ContextoDeEvento.Interfaces;
 using SisEUs.Domain.ContextoDeEvento.ObjetosDeValor;
@@ -17,7 +18,8 @@ namespace SisEUs.Application.Apresentacoes
         IApresentacaoRepositorio apresentacaoRepositorio,
         ILogger<ApresentacaoServico> logger,
         IUoW uow,
-        IMapeadorDeEntidades mapeador) : IApresentacaoServico
+        IMapeadorDeEntidades mapeador,
+        ILoggedUser loggedUser) : IApresentacaoServico
     {
         public async Task<Resultado<ApresentacaoResposta>> CriarApresentacaoAsync(CriarApresentacaoSolicitacao request, CancellationToken cancellationToken)
         {
@@ -187,6 +189,42 @@ namespace SisEUs.Application.Apresentacoes
             catch (Exception ex)
             {
                 logger.LogError(ex, "Erro inesperado ao atualizar apresentação {ApresentacaoId}", apresentacaoId);
+                throw;
+            }
+        }
+
+        public async Task<Resultado<IEnumerable<ApresentacaoResposta>>> ObterMinhasApresentacoesAsync(CancellationToken cancellationToken)
+        {
+            logger.LogInformation("Obtendo apresentações do usuário logado");
+
+            try
+            {
+                var usuario = await loggedUser.User();
+                var nomeCompleto = $"{usuario.Nome.Nome} {usuario.Nome.Sobrenome}";
+
+                logger.LogInformation("Buscando apresentações para o autor: {NomeAutor}", nomeCompleto);
+
+                var apresentacoes = await apresentacaoRepositorio.ObterPorNomeAutorAsync(nomeCompleto, cancellationToken);
+
+                if (!apresentacoes.Any())
+                {
+                    logger.LogInformation("Nenhuma apresentação encontrada para o autor {NomeAutor}", nomeCompleto);
+                    return Resultado<IEnumerable<ApresentacaoResposta>>.Ok(Enumerable.Empty<ApresentacaoResposta>());
+                }
+
+                var dtos = new List<ApresentacaoResposta>();
+                foreach (var apresentacao in apresentacoes)
+                {
+                    var dto = await mapeador.MapearApresentacaoAsync(apresentacao, cancellationToken);
+                    dtos.Add(dto);
+                }
+
+                logger.LogInformation("Encontradas {Count} apresentações para o autor {NomeAutor}", dtos.Count, nomeCompleto);
+                return Resultado<IEnumerable<ApresentacaoResposta>>.Ok(dtos);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Erro ao obter apresentações do usuário logado");
                 throw;
             }
         }

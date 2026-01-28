@@ -60,5 +60,15 @@ namespace SisEUs.Infrastructure.Repositorios
 
             return await query.AnyAsync(cancellationToken);
         }
+
+        public async Task<IEnumerable<Evento>> ObterEventosPorAvaliadorIdAsync(int avaliadorId, CancellationToken cancellationToken = default)
+        {
+            return await context.Eventos
+                .AsNoTracking()
+                .Include(e => e.Apresentacoes)
+                .Where(e => e.AvaliadoresIds.Contains(avaliadorId))
+                .OrderByDescending(e => e.DataInicio)
+                .ToListAsync(cancellationToken);
+        }
     }
 }

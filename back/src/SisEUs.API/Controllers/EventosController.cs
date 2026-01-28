@@ -4,12 +4,13 @@ using SisEUs.API.Controllers;
 using SisEUs.Application.Eventos.Abstracoes;
 using SisEUs.Application.Eventos.DTOs.Resposta;
 using SisEUs.Application.Eventos.DTOs.Solicitacoes;
+using SisEUs.Domain.Comum.LoggedUser;
 using SisEUs.Domain.ContextoDeUsuario.Enumeracoes;
 
 namespace SisEUs.Api.Controllers
 {
     [AuthenticatedUser]
-    public class EventosController(IEventoServico servico) : BaseController
+    public class EventosController(IEventoServico servico, ILoggedUser loggedUser) : BaseController
     {
         [HttpPost]
         [ProducesResponseType(typeof(EventoResposta), StatusCodes.Status201Created)]
@@ -99,9 +100,9 @@ namespace SisEUs.Api.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> AdicionarAvaliador(int eventoId, [FromBody] int avaliadorId, CancellationToken cancellationToken)
+        public async Task<IActionResult> AdicionarAvaliador(int eventoId, [FromBody] string cpf, CancellationToken cancellationToken)
         {
-            var resultado = await servico.AdicionarAvaliadorAsync(avaliadorId, eventoId, cancellationToken);
+            var resultado = await servico.AdicionarAvaliadorPorCpfAsync(cpf, eventoId, cancellationToken);
             return HandleResult(resultado);
         }
 
@@ -121,6 +122,32 @@ namespace SisEUs.Api.Controllers
         public async Task<IActionResult> ObterEventoPorCodigo([FromQuery] string codigo, CancellationToken cancellationToken)
         {
             var resultado = await servico.ObterPorCodigoEvento(codigo, cancellationToken);
+            return HandleResult(resultado);
+        }
+
+        /// <summary>
+        /// Obtém os eventos em que o usuário logado é avaliador
+        /// </summary>
+        [HttpGet("meus-eventos-avaliar")]
+        [ProducesResponseType(typeof(IEnumerable<EventoResposta>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> ObterMeusEventosParaAvaliar(CancellationToken cancellationToken)
+        {
+            var usuario = await loggedUser.User();
+            var resultado = await servico.ObterEventosPorAvaliadorAsync(usuario.Id, cancellationToken);
+            return HandleResult(resultado);
+        }
+
+        /// <summary>
+        /// Obtém os eventos em que um avaliador específico deve avaliar
+        /// </summary>
+        [HttpGet("avaliador/{avaliadorId:int}/eventos")]
+        [AuthorizeRoles(ETipoUsuario.Admin, ETipoUsuario.Professor)]
+        [ProducesResponseType(typeof(IEnumerable<EventoResposta>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> ObterEventosPorAvaliador(int avaliadorId, CancellationToken cancellationToken)
+        {
+            var resultado = await servico.ObterEventosPorAvaliadorAsync(avaliadorId, cancellationToken);
             return HandleResult(resultado);
         }
     }

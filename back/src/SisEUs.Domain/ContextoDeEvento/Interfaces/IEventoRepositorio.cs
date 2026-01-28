@@ -11,5 +11,6 @@ namespace SisEUs.Domain.ContextoDeEvento.Interfaces
         Task CriarEventoAsync(Evento evento, CancellationToken cancellationToken = default!);
         void ExcluirEvento(Evento evento);
         Task<bool> CodigoUnicoJaExisteAsync(string codigoUnico, int? eventoIdExcluir = null, CancellationToken cancellationToken = default!);
+        Task<IEnumerable<Evento>> ObterEventosPorAvaliadorIdAsync(int avaliadorId, CancellationToken cancellationToken = default!);
     }
 }

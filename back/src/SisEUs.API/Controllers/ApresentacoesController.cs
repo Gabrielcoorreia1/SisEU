@@ -62,5 +62,16 @@ namespace SisEUs.API.Controllers
             var resultado = await servico.ExcluirApresentacaoAsync(id, cancellationToken);
             return HandleResult(resultado);
         }
+
+        /// <summary>
+        /// Obtém as apresentações em que o usuário logado é autor
+        /// </summary>
+        [HttpGet("minhas-apresentacoes")]
+        [ProducesResponseType(typeof(IEnumerable<ApresentacaoResposta>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> ObterMinhasApresentacoes(CancellationToken cancellationToken)
+        {
+            var resultado = await servico.ObterMinhasApresentacoesAsync(cancellationToken);
+            return HandleResult(resultado);
+        }
     }
 }

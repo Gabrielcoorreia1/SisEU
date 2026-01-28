@@ -29,6 +29,14 @@ namespace SisEUs.Infrastructure.Repositorios
             return await _context.Usuarios.FirstOrDefaultAsync(u => u.Cpf == cpf, cancellationToken);
         }
 
+        public async Task<IEnumerable<Usuario>> ObterPorCpfsAsync(IEnumerable<string> cpfs, CancellationToken cancellationToken = default)
+        {
+            var cpfsList = cpfs.ToList();
+            return await _context.Usuarios
+                .Where(u => cpfsList.Contains(u.Cpf.Valor))
+                .ToListAsync(cancellationToken);
+        }
+
         public async Task<bool> EmailJaExisteAsync(Email email, CancellationToken cancellationToken = default)
         {
             return await _context.Usuarios.AnyAsync(u => u.Email == email, cancellationToken);

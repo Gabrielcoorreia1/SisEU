@@ -24,6 +24,16 @@ namespace SisEUs.Infrastructure.Repositorios
                 .ToListAsync(cancellationToken);
         }
 
+        public async Task<IEnumerable<Apresentacao>> ObterPorNomeAutorAsync(string nomeAutor, CancellationToken cancellationToken = default)
+        {
+            var nomeBusca = nomeAutor.ToLower().Trim();
+            return await context.Apresentacoes
+                .AsNoTracking()
+                .Include(a => a.Evento)
+                .Where(a => a.NomeAutor.ToLower().Contains(nomeBusca))
+                .ToListAsync(cancellationToken);
+        }
+
         public void Remover(Apresentacao apresentacao)
         {
             context.Apresentacoes.Remove(apresentacao);
