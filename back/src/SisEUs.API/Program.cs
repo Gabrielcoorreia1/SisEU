@@ -107,14 +107,54 @@ builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
+// Aguardar o banco de dados estar pronto e inicializar
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
     var context = services.GetRequiredService<SisEUs.Infrastructure.Repositorios.AppDbContext>();
 
-    context.Database.EnsureDeleted(); 
-    context.Database.EnsureCreated(); 
-    await InitBD.SeedAsync(context);
+    var maxRetries = 30;
+    var delay = TimeSpan.FromSeconds(3);
+    
+    for (int i = 0; i < maxRetries; i++)
+    {
+        try
+        {
+            logger.LogInformation("Tentando conectar ao banco de dados... (Tentativa {Attempt}/{MaxRetries})", i + 1, maxRetries);
+            
+            // Testa a conexão
+            await context.Database.CanConnectAsync();
+            
+            logger.LogInformation("Conexão com o banco de dados estabelecida com sucesso!");
+            
+            // Aguarda mais um pouco para garantir que o banco está completamente pronto
+            await Task.Delay(TimeSpan.FromSeconds(2));
+            
+            // Recria o banco de dados
+            logger.LogInformation("Recriando o banco de dados...");
+            context.Database.EnsureDeleted(); 
+            context.Database.EnsureCreated();
+            
+            // Popula dados iniciais
+            logger.LogInformation("Populando dados iniciais...");
+            await InitBD.SeedAsync(context);
+            
+            logger.LogInformation("Banco de dados inicializado com sucesso!");
+            break;
+        }
+        catch (Exception ex)
+        {
+            if (i == maxRetries - 1)
+            {
+                logger.LogError(ex, "Não foi possível conectar ao banco de dados após {MaxRetries} tentativas.", maxRetries);
+                throw;
+            }
+            
+            logger.LogWarning(ex, "Falha ao conectar ao banco de dados. Aguardando {Delay} segundos antes de tentar novamente...", delay.TotalSeconds);
+            await Task.Delay(delay);
+        }
+    }
 }
 
 if (app.Environment.IsDevelopment())
