@@ -22,8 +22,8 @@ namespace SisEUs.Domain.ContextoDeEvento.Entidades
         public Evento Evento { get; private set; } = null!;
 
         public Titulo Titulo { get; private set; } = null!;
-        public int AutorId { get; private set; }
-        public int OrientadorId { get; private set; }
+        public string NomeAutor { get; private set; } = null!;
+        public string NomeOrientador { get; private set; } = null!;
         public EModalidadeApresentacao Modalidade { get; private set; }
 
         public static Apresentacao Criar(int eventoId, Titulo titulo, int autorId, int orientadorId, EModalidadeApresentacao modalidade)
