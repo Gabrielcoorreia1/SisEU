@@ -22,12 +22,12 @@ namespace SisEUs.Application.Eventos.Abstracoes
         
         Task<Resultado> AdicionarAvaliadorPorCpfAsync(string cpf, int eventoId, CancellationToken cancellationToken);
         
-        Task<Resultado> AdicionarAvaliadorAsync(int avaliadorId, int eventoId, CancellationToken cancellationToken);
-        
         Task<Resultado> RemoverAvaliadorAsync(int avaliadorId, int eventoId, CancellationToken cancellationToken);
         
         Task<Resultado<EventoResposta>> ObterPorCodigoEvento(string codigoEvento, CancellationToken cancellationToken);
-        
+
         Task<Resultado<IEnumerable<EventoResposta>>> ObterEventosPorAvaliadorAsync(int avaliadorId, CancellationToken cancellationToken);
+        
+        Task<Resultado<IEnumerable<EventoResposta>>> ObterMeusEventosComoAvaliadorAsync(CancellationToken cancellationToken);
     }
 }

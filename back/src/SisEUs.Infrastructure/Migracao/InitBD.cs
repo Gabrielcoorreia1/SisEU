@@ -250,39 +250,40 @@ namespace SisEUs.Infrastructure.Migracao
             await context.Eventos.AddRangeAsync(eventoTech, eventoIA, eventoMostra, eventoWeb, eventoSimposio, eventoHack);
             await context.SaveChangesAsync();
 
-            var apTech1 = Apresentacao.Criar(eventoTech.Id, Titulo.Criar("Aplicações de Machine Learning na Saúde"), "Ana Beatriz Lima", "Carlos Eduardo Silva", EModalidadeApresentacao.Oral);
-            var apTech2 = Apresentacao.Criar(eventoTech.Id, Titulo.Criar("Blockchain para Rastreabilidade Alimentar"), "Bruno Henrique Castro", "Maria Fernanda Costa", EModalidadeApresentacao.Oral);
-            var apTech3 = Apresentacao.Criar(eventoTech.Id, Titulo.Criar("IoT na Agricultura Familiar"), "Carla Dias Ferreira", "Roberto Almeida Junior", EModalidadeApresentacao.Oral);
-            var apTech4 = Apresentacao.Criar(eventoTech.Id, Titulo.Criar("Realidade Aumentada na Educação"), "Daniel Martins", "Carlos Eduardo Silva", EModalidadeApresentacao.Oral);
-            var apTech5 = Apresentacao.Criar(eventoTech.Id, Titulo.Criar("Chatbots Inteligentes para Atendimento"), "Elena Ribeiro", "Maria Fernanda Costa", EModalidadeApresentacao.Oral);
+            // Criando apresentações com AutorId e OrientadorId
+            var apTech1 = Apresentacao.Criar(eventoTech.Id, Titulo.Criar("Aplicações de Machine Learning na Saúde"), estAna.Id, profCarlos.Id, EModalidadeApresentacao.Oral);
+            var apTech2 = Apresentacao.Criar(eventoTech.Id, Titulo.Criar("Blockchain para Rastreabilidade Alimentar"), estBruno.Id, profMaria.Id, EModalidadeApresentacao.Oral);
+            var apTech3 = Apresentacao.Criar(eventoTech.Id, Titulo.Criar("IoT na Agricultura Familiar"), estCarla.Id, profRoberto.Id, EModalidadeApresentacao.Oral);
+            var apTech4 = Apresentacao.Criar(eventoTech.Id, Titulo.Criar("Realidade Aumentada na Educação"), estDaniel.Id, profCarlos.Id, EModalidadeApresentacao.Oral);
+            var apTech5 = Apresentacao.Criar(eventoTech.Id, Titulo.Criar("Chatbots Inteligentes para Atendimento"), estElena.Id, profMaria.Id, EModalidadeApresentacao.Oral);
 
-            var apIA1 = Apresentacao.Criar(eventoIA.Id, Titulo.Criar("Redes Neurais Convolucionais para Diagnóstico Médico"), "Fabio Gomes", "Carlos Eduardo Silva", EModalidadeApresentacao.Oral);
-            var apIA2 = Apresentacao.Criar(eventoIA.Id, Titulo.Criar("Processamento de Linguagem Natural em Português"), "Gabriela Nunes", "Roberto Almeida Junior", EModalidadeApresentacao.Oral);
-            var apIA3 = Apresentacao.Criar(eventoIA.Id, Titulo.Criar("Visão Computacional para Segurança Pública"), "Hugo Teixeira", "Carlos Eduardo Silva", EModalidadeApresentacao.Oral);
-            var apIA4 = Apresentacao.Criar(eventoIA.Id, Titulo.Criar("IA Generativa: Tendências e Aplicações"), "Isabela Moreira", "Roberto Almeida Junior", EModalidadeApresentacao.Oral);
-            var apIA5 = Apresentacao.Criar(eventoIA.Id, Titulo.Criar("Sistemas de Recomendação com Deep Learning"), "João Victor Souza", "Carlos Eduardo Silva", EModalidadeApresentacao.Oral);
-            var apIA6 = Apresentacao.Criar(eventoIA.Id, Titulo.Criar("Ética em Inteligência Artificial"), "Karina Lopes", "Roberto Almeida Junior", EModalidadeApresentacao.Oral);
+            var apIA1 = Apresentacao.Criar(eventoIA.Id, Titulo.Criar("Redes Neurais Convolucionais para Diagnóstico Médico"), estFabio.Id, profCarlos.Id, EModalidadeApresentacao.Oral);
+            var apIA2 = Apresentacao.Criar(eventoIA.Id, Titulo.Criar("Processamento de Linguagem Natural em Português"), estGabriela.Id, profRoberto.Id, EModalidadeApresentacao.Oral);
+            var apIA3 = Apresentacao.Criar(eventoIA.Id, Titulo.Criar("Visão Computacional para Segurança Pública"), estHugo.Id, profCarlos.Id, EModalidadeApresentacao.Oral);
+            var apIA4 = Apresentacao.Criar(eventoIA.Id, Titulo.Criar("IA Generativa: Tendências e Aplicações"), estIsabela.Id, profRoberto.Id, EModalidadeApresentacao.Oral);
+            var apIA5 = Apresentacao.Criar(eventoIA.Id, Titulo.Criar("Sistemas de Recomendação com Deep Learning"), estJoao.Id, profCarlos.Id, EModalidadeApresentacao.Oral);
+            var apIA6 = Apresentacao.Criar(eventoIA.Id, Titulo.Criar("Ética em Inteligência Artificial"), estKarina.Id, profRoberto.Id, EModalidadeApresentacao.Oral);
 
-            var apMostra1 = Apresentacao.Criar(eventoMostra.Id, Titulo.Criar("Horta Comunitária Inteligente"), "Leonardo Barros", "Maria Fernanda Costa", EModalidadeApresentacao.Poster);
-            var apMostra2 = Apresentacao.Criar(eventoMostra.Id, Titulo.Criar("App de Carona Solidária"), "Ana Beatriz Lima", "Maria Fernanda Costa", EModalidadeApresentacao.Poster);
-            var apMostra3 = Apresentacao.Criar(eventoMostra.Id, Titulo.Criar("Plataforma de Doações"), "Bruno Henrique Castro", "Maria Fernanda Costa", EModalidadeApresentacao.Poster);
-            var apMostra4 = Apresentacao.Criar(eventoMostra.Id, Titulo.Criar("Sistema de Gestão para ONGs"), "Carla Dias Ferreira", "Maria Fernanda Costa", EModalidadeApresentacao.Poster);
+            var apMostra1 = Apresentacao.Criar(eventoMostra.Id, Titulo.Criar("Horta Comunitária Inteligente"), estLeonardo.Id, profMaria.Id, EModalidadeApresentacao.Poster);
+            var apMostra2 = Apresentacao.Criar(eventoMostra.Id, Titulo.Criar("App de Carona Solidária"), estAna.Id, profMaria.Id, EModalidadeApresentacao.Poster);
+            var apMostra3 = Apresentacao.Criar(eventoMostra.Id, Titulo.Criar("Plataforma de Doações"), estBruno.Id, profMaria.Id, EModalidadeApresentacao.Poster);
+            var apMostra4 = Apresentacao.Criar(eventoMostra.Id, Titulo.Criar("Sistema de Gestão para ONGs"), estCarla.Id, profMaria.Id, EModalidadeApresentacao.Poster);
 
-            var apWeb1 = Apresentacao.Criar(eventoWeb.Id, Titulo.Criar("API REST com .NET 8"), "Daniel Martins", "Roberto Almeida Junior", EModalidadeApresentacao.Pitch);
-            var apWeb2 = Apresentacao.Criar(eventoWeb.Id, Titulo.Criar("Frontend com React e TypeScript"), "Elena Ribeiro", "Roberto Almeida Junior", EModalidadeApresentacao.Pitch);
-            var apWeb3 = Apresentacao.Criar(eventoWeb.Id, Titulo.Criar("Microsserviços com Docker"), "Fabio Gomes", "Roberto Almeida Junior", EModalidadeApresentacao.Pitch);
+            var apWeb1 = Apresentacao.Criar(eventoWeb.Id, Titulo.Criar("API REST com .NET 8"), estDaniel.Id, profRoberto.Id, EModalidadeApresentacao.Pitch);
+            var apWeb2 = Apresentacao.Criar(eventoWeb.Id, Titulo.Criar("Frontend com React e TypeScript"), estElena.Id, profRoberto.Id, EModalidadeApresentacao.Pitch);
+            var apWeb3 = Apresentacao.Criar(eventoWeb.Id, Titulo.Criar("Microsserviços com Docker"), estFabio.Id, profRoberto.Id, EModalidadeApresentacao.Pitch);
 
-            var apSimp1 = Apresentacao.Criar(eventoSimposio.Id, Titulo.Criar("Computação Quântica: Estado da Arte"), "Gabriela Nunes", "Carlos Eduardo Silva", EModalidadeApresentacao.Oral);
-            var apSimp2 = Apresentacao.Criar(eventoSimposio.Id, Titulo.Criar("Segurança Cibernética em Infraestruturas Críticas"), "Hugo Teixeira", "Maria Fernanda Costa", EModalidadeApresentacao.Oral);
-            var apSimp3 = Apresentacao.Criar(eventoSimposio.Id, Titulo.Criar("Big Data na Tomada de Decisões"), "Isabela Moreira", "Roberto Almeida Junior", EModalidadeApresentacao.Oral);
-            var apSimp4 = Apresentacao.Criar(eventoSimposio.Id, Titulo.Criar("Computação em Nuvem Verde"), "João Victor Souza", "Carlos Eduardo Silva", EModalidadeApresentacao.Oral);
-            var apSimp5 = Apresentacao.Criar(eventoSimposio.Id, Titulo.Criar("Acessibilidade Digital"), "Karina Lopes", "Maria Fernanda Costa", EModalidadeApresentacao.Oral);
-            var apSimp6 = Apresentacao.Criar(eventoSimposio.Id, Titulo.Criar("DevOps e Cultura de Qualidade"), "Leonardo Barros", "Roberto Almeida Junior", EModalidadeApresentacao.Oral);
+            var apSimp1 = Apresentacao.Criar(eventoSimposio.Id, Titulo.Criar("Computação Quântica: Estado da Arte"), estGabriela.Id, profCarlos.Id, EModalidadeApresentacao.Oral);
+            var apSimp2 = Apresentacao.Criar(eventoSimposio.Id, Titulo.Criar("Segurança Cibernética em Infraestruturas Críticas"), estHugo.Id, profMaria.Id, EModalidadeApresentacao.Oral);
+            var apSimp3 = Apresentacao.Criar(eventoSimposio.Id, Titulo.Criar("Big Data na Tomada de Decisões"), estIsabela.Id, profRoberto.Id, EModalidadeApresentacao.Oral);
+            var apSimp4 = Apresentacao.Criar(eventoSimposio.Id, Titulo.Criar("Computação em Nuvem Verde"), estJoao.Id, profCarlos.Id, EModalidadeApresentacao.Oral);
+            var apSimp5 = Apresentacao.Criar(eventoSimposio.Id, Titulo.Criar("Acessibilidade Digital"), estKarina.Id, profMaria.Id, EModalidadeApresentacao.Oral);
+            var apSimp6 = Apresentacao.Criar(eventoSimposio.Id, Titulo.Criar("DevOps e Cultura de Qualidade"), estLeonardo.Id, profRoberto.Id, EModalidadeApresentacao.Oral);
 
-            var apHack1 = Apresentacao.Criar(eventoHack.Id, Titulo.Criar("App de Coleta Seletiva Gamificada"), "Ana Beatriz Lima", "Carlos Eduardo Silva", EModalidadeApresentacao.Pitch);
-            var apHack2 = Apresentacao.Criar(eventoHack.Id, Titulo.Criar("Plataforma de Energia Solar Compartilhada"), "Bruno Henrique Castro", "Roberto Almeida Junior", EModalidadeApresentacao.Pitch);
-            var apHack3 = Apresentacao.Criar(eventoHack.Id, Titulo.Criar("Sistema de Monitoramento de Água"), "Carla Dias Ferreira", "Carlos Eduardo Silva", EModalidadeApresentacao.Pitch);
-            var apHack4 = Apresentacao.Criar(eventoHack.Id, Titulo.Criar("Marketplace de Produtos Orgânicos"), "Daniel Martins", "Roberto Almeida Junior", EModalidadeApresentacao.Pitch);
+            var apHack1 = Apresentacao.Criar(eventoHack.Id, Titulo.Criar("App de Coleta Seletiva Gamificada"), estAna.Id, profCarlos.Id, EModalidadeApresentacao.Pitch);
+            var apHack2 = Apresentacao.Criar(eventoHack.Id, Titulo.Criar("Plataforma de Energia Solar Compartilhada"), estBruno.Id, profRoberto.Id, EModalidadeApresentacao.Pitch);
+            var apHack3 = Apresentacao.Criar(eventoHack.Id, Titulo.Criar("Sistema de Monitoramento de Água"), estCarla.Id, profCarlos.Id, EModalidadeApresentacao.Pitch);
+            var apHack4 = Apresentacao.Criar(eventoHack.Id, Titulo.Criar("Marketplace de Produtos Orgânicos"), estDaniel.Id, profRoberto.Id, EModalidadeApresentacao.Pitch);
 
             await context.Apresentacoes.AddRangeAsync(
                 apTech1, apTech2, apTech3, apTech4, apTech5,

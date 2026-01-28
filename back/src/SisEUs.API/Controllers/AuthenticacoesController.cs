@@ -61,25 +61,23 @@ namespace SisEUs.API.Controllers
             return HandleResult(resultado);
         }
 
-        [HttpPut("{id:int}/tornar-professor")]
-        [AuthorizeRoles(ETipoUsuario.Admin)]
+        [HttpPut("{cpf:int}/tornar-professor")]
         [ProducesResponseType(typeof(UsuarioResposta), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> TornarProfessorAsync(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> TornarProfessorAsync(int cpf, CancellationToken cancellationToken)
         {
-            var resultado = await authService.TornarProfessorAsync(id, cancellationToken);
+            var resultado = await authService.TornarProfessorAsync(cpf, cancellationToken);
             return HandleResult(resultado);
         }
 
-        [HttpPut("{id:int}/tornar-avaliador")]
-        [AuthorizeRoles(ETipoUsuario.Admin)]
+        [HttpPut("{cpf:int}/tornar-avaliador")]
         [ProducesResponseType(typeof(UsuarioResposta), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> TornarAvaliadorAsync(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> TornarAvaliadorAsync(int cpf, CancellationToken cancellationToken)
         {
-            var resultado = await authService.TornarAvaliadorAsync(id, cancellationToken);
+            var resultado = await authService.TornarAvaliadorAsync(cpf, cancellationToken);
             return HandleResult(resultado);
         }
     }

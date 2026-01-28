@@ -10,7 +10,7 @@ namespace SisEUs.Application.Eventos.DTOs.Solicitacoes
         DateTime DataFim,
         CriarLocalSolicitacao Local,
         ETipoEvento ETipoEvento,
-        List<string>? AvaliadoresCpfs,
+        List<string>? CpfsAvaliadores,
         string ImgUrl,
         string CodigoUnico,
         List<CriarApresentacaoSolicitacao> Apresentacoes

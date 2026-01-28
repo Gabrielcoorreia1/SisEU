@@ -142,6 +142,7 @@ namespace SisEUs.Api.Controllers
         /// Obtém os eventos em que um avaliador específico deve avaliar
         /// </summary>
         [HttpGet("avaliador/{avaliadorId:int}/eventos")]
+        [AuthorizeRoles(ETipoUsuario.Admin, ETipoUsuario.Professor)]
         [ProducesResponseType(typeof(IEnumerable<EventoResposta>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> ObterEventosPorAvaliador(int avaliadorId, CancellationToken cancellationToken)

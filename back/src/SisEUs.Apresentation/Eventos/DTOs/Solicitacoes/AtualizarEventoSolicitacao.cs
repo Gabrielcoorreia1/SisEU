@@ -13,7 +13,7 @@ namespace SisEUs.Application.Eventos.DTOs.Solicitacoes
         ETipoEvento ETipoEvento,
         string ImgUrl,
         string CodigoUnico,
-        List<string>? AvaliadoresCpfs,
+        List<string>? CpfsAvaliadores,
         List<CriarApresentacaoSolicitacao> Apresentacoes
     );
 }

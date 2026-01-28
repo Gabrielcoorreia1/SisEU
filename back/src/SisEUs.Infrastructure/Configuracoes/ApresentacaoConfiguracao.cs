@@ -9,7 +9,7 @@ namespace SisEUs.Infrastructure.Configuracoes
     {
         public void Configure(EntityTypeBuilder<Apresentacao> builder)
         {
-            builder.ToTable("Eventos"); // Nome correto
+            builder.ToTable("Apresentacoes");
             builder.HasKey(a => a.Id);
 
             builder.Property(a => a.EventoId).IsRequired();
@@ -26,8 +26,8 @@ namespace SisEUs.Infrastructure.Configuracoes
                    .HasMaxLength(300)
                    .IsRequired();
 
-            builder.Property(a => a.NomeAutor).IsRequired(false);
-            builder.Property(a => a.NomeOrientador).IsRequired(false);
+            builder.Property(a => a.AutorId).IsRequired();
+            builder.Property(a => a.OrientadorId).IsRequired();
         }
     }
 }
