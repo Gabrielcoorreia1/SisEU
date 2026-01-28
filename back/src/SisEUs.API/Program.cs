@@ -74,9 +74,22 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddSwaggerGen(options =>
 {
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "SisEUs API",
+        Version = "v1",
+        Description = "API para gerenciamento de eventos acadêmicos, presenças e avaliações",
+        Contact = new OpenApiContact
+        {
+            Name = "SisEUs Team"
+        }
+    });
+
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = @"JWT Authorization header using Bearer scheme.",
+        Description = @"JWT Authorization header using Bearer scheme. 
+                      Insira 'Bearer' [espaço] e então seu token na caixa de texto abaixo.
+                      Exemplo: 'Bearer 12345abcdef'",
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
@@ -100,6 +113,18 @@ builder.Services.AddSwaggerGen(options =>
             new List<string>()
         }
     });
+
+    // Habilita os comentários XML
+    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
+    {
+        options.IncludeXmlComments(xmlPath);
+    }
+
+    // Agrupa endpoints por Tags
+    options.TagActionsBy(api => new[] { api.GroupName ?? api.ActionDescriptor.RouteValues["controller"] });
+    options.DocInclusionPredicate((name, api) => true);
 });
 
 builder.Services.AddScoped<ITokenProvider, HttpContextTokenValue>();

@@ -7,8 +7,16 @@ using SisEUs.Domain.ContextoDeUsuario.Enumeracoes;
 
 namespace SisEUs.API.Controllers
 {
+    /// <summary>
+    /// Gerenciamento de check-in e check-out com PIN
+    /// </summary>
+    [Tags("Check-in")]
     public class CheckinController(IPinService pinService) : BaseController
     {
+        /// <summary>
+        /// Obtém o PIN ativo atual para check-in
+        /// </summary>
+        /// <returns>PIN ativo</returns>
         [HttpGet("pin-ativo")]
         [AuthenticatedUser]
         [ProducesResponseType(typeof(PinResposta), StatusCodes.Status200OK)]
@@ -19,6 +27,10 @@ namespace SisEUs.API.Controllers
             return HandleResult(resultado);
         }
 
+        /// <summary>
+        /// Gera um novo PIN para check-in (apenas administradores)
+        /// </summary>
+        /// <returns>Novo PIN gerado</returns>
         [HttpPost("pin")]
         [AuthenticatedUser]
         [ProducesResponseType(typeof(PinResposta), StatusCodes.Status201Created)]
@@ -36,6 +48,11 @@ namespace SisEUs.API.Controllers
             return HandleResult(resultado);
         }
 
+        /// <summary>
+        /// Valida se um PIN está ativo e correto
+        /// </summary>
+        /// <param name="request">PIN a ser validado</param>
+        /// <returns>Sem conteúdo se válido</returns>
         [HttpPost("validar-pin")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -45,6 +62,11 @@ namespace SisEUs.API.Controllers
             return HandleResult(resultado);
         }
 
+        /// <summary>
+        /// Registra o check-in do usuário com PIN e localização
+        /// </summary>
+        /// <param name="request">PIN e coordenadas de localização</param>
+        /// <returns>Confirmação de check-in registrado</returns>
         [HttpPost("registrar")]
         [AuthenticatedUser]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -66,6 +88,11 @@ namespace SisEUs.API.Controllers
             return HandleResult(resultado);
         }
 
+        /// <summary>
+        /// Registra o check-out do usuário com localização
+        /// </summary>
+        /// <param name="request">Coordenadas de localização</param>
+        /// <returns>Confirmação de check-out registrado</returns>
         [HttpPost("checkout")]
         [AuthenticatedUser]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -87,6 +114,10 @@ namespace SisEUs.API.Controllers
             return HandleResult(resultado);
         }
 
+        /// <summary>
+        /// Obtém o relatório completo de todos os check-ins e check-outs
+        /// </summary>
+        /// <returns>Relatório de check-ins</returns>
         [HttpGet("relatorio")]
         [AuthenticatedUser]
         [ProducesResponseType(typeof(IEnumerable<RelatorioCheckinResposta>), StatusCodes.Status200OK)]

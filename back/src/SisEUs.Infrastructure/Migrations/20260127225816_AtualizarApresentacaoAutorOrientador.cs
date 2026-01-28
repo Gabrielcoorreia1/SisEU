@@ -11,10 +11,6 @@ namespace SisEUs.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Avaliacoes_Eventos_ApresentacaoId",
-                table: "Avaliacoes");
-
-            migrationBuilder.DropForeignKey(
                 name: "FK_Eventos_Sessao_EventoId",
                 table: "Eventos");
 
@@ -115,14 +111,6 @@ namespace SisEUs.Infrastructure.Migrations
                 name: "PK_Eventos",
                 table: "Eventos",
                 column: "Id");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Avaliacoes_Eventos_ApresentacaoId",
-                table: "Avaliacoes",
-                column: "ApresentacaoId",
-                principalTable: "Eventos",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Eventos_Sessao_EventoId",

@@ -31,6 +31,7 @@ namespace SisEUs.Application.Eventos
         private readonly IMapeadorDeEntidades _mapeador;
 
         public EventoServico(
+            ILoggedUser loggedUser,
             IEventoRepositorio eventoRepositorio,
             IUsuarioRepositorio usuarioRepositorio,
             IUoW uow,
@@ -46,6 +47,7 @@ namespace SisEUs.Application.Eventos
             _logger = logger;
             _geolocalizacaoValidador = geolocalizacaoValidador;
             _mapeador = mapeador;
+            _loggedUser = loggedUser;
         }
 
         public async Task<Resultado<EventoResposta>> CriarEventoAsync(CriarEventoSolicitacao request, CancellationToken cancellationToken)

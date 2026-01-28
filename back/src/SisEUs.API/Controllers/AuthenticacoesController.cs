@@ -9,10 +9,19 @@ using SisEUs.Domain.ContextoDeUsuario.Enumeracoes;
 
 namespace SisEUs.API.Controllers
 {
+    /// <summary>
+    /// Autenticação e gerenciamento de usuários
+    /// </summary>
+    [Tags("Autenticação")]
     public class AuthenticacoesController(
         IAuthService authService) : BaseController
     {
-
+        /// <summary>
+        /// Realiza o login do usuário no sistema
+        /// </summary>
+        /// <param name="request">Credenciais de login (email/CPF e senha)</param>
+        /// <param name="cancellationToken">Token de cancelamento</param>
+        /// <returns>Token JWT e dados do usuário</returns>
         [HttpPost("login")]
         [ProducesResponseType(typeof(LoginResposta), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -23,6 +32,12 @@ namespace SisEUs.API.Controllers
             return HandleResult(resultado);
         }
 
+        /// <summary>
+        /// Registra um novo usuário no sistema
+        /// </summary>
+        /// <param name="request">Dados do novo usuário</param>
+        /// <param name="cancellationToken">Token de cancelamento</param>
+        /// <returns>Usuário criado</returns>
         [HttpPost("registrar")]
         [ProducesResponseType(typeof(UsuarioResposta), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -42,6 +57,12 @@ namespace SisEUs.API.Controllers
             return HandleResult(resultado);
         }
 
+        /// <summary>
+        /// Busca professores por nome
+        /// </summary>
+        /// <param name="nome">Nome ou parte do nome do professor</param>
+        /// <param name="cancellationToken">Token de cancelamento</param>
+        /// <returns>Lista de professores encontrados</returns>
         [HttpGet("buscar")]
         [AuthenticatedUser]
         [ProducesResponseType(typeof(BuscarUsuariosResposta), StatusCodes.Status200OK)]
@@ -51,6 +72,12 @@ namespace SisEUs.API.Controllers
             return HandleResult(resultado);
         }
 
+        /// <summary>
+        /// Obtém os dados de um usuário específico
+        /// </summary>
+        /// <param name="id">ID do usuário</param>
+        /// <param name="cancellationToken">Token de cancelamento</param>
+        /// <returns>Dados do usuário</returns>
         [HttpGet("{id:int}")]
         [AuthenticatedUser]
         [ProducesResponseType(typeof(UsuarioResposta), StatusCodes.Status200OK)]
@@ -61,6 +88,12 @@ namespace SisEUs.API.Controllers
             return HandleResult(resultado);
         }
 
+        /// <summary>
+        /// Promove um usuário para o tipo Professor
+        /// </summary>
+        /// <param name="cpf">CPF do usuário</param>
+        /// <param name="cancellationToken">Token de cancelamento</param>
+        /// <returns>Usuário atualizado</returns>
         [HttpPut("{cpf:int}/tornar-professor")]
         [ProducesResponseType(typeof(UsuarioResposta), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -71,6 +104,12 @@ namespace SisEUs.API.Controllers
             return HandleResult(resultado);
         }
 
+        /// <summary>
+        /// Promove um usuário para o tipo Avaliador
+        /// </summary>
+        /// <param name="cpf">CPF do usuário</param>
+        /// <param name="cancellationToken">Token de cancelamento</param>
+        /// <returns>Usuário atualizado</returns>
         [HttpPut("{cpf:int}/tornar-avaliador")]
         [ProducesResponseType(typeof(UsuarioResposta), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

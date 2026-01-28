@@ -31,10 +31,14 @@ namespace SisEUs.Infrastructure.Repositorios
 
         public async Task<IEnumerable<Usuario>> ObterPorCpfsAsync(IEnumerable<string> cpfs, CancellationToken cancellationToken = default)
         {
+            if (!cpfs.Any())
+            {
+                return Enumerable.Empty<Usuario>();
+            }
+
             var cpfsList = cpfs.ToList();
-            return await _context.Usuarios
-                .Where(u => cpfsList.Contains(u.Cpf.Valor))
-                .ToListAsync(cancellationToken);
+            var todosUsuarios = await _context.Usuarios.ToListAsync(cancellationToken);
+            return todosUsuarios.Where(u => cpfsList.Contains(u.Cpf.Valor)).ToList();
         }
 
         public async Task<bool> EmailJaExisteAsync(Email email, CancellationToken cancellationToken = default)
