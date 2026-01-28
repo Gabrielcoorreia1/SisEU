@@ -1,15 +1,10 @@
 {
   "ExpandedNodes": [
     "",
-    "\\back",
-    "\\back\\src",
-    "\\back\\src\\SisEUs.API",
-    "\\back\\src\\SisEUs.API\\Controllers",
-    "\\back\\src\\SisEUs.API\\Filter",
-    "\\back\\src\\SisEUs.API\\Token",
-    "\\back\\src\\SisEUs.Apresentation\\Authenticacoes\\DTOs",
-    "\\back\\src\\SisEUs.Apresentation\\Authenticacoes\\DTOs\\Resposta"
+    "\\front",
+    "\\front\\seu",
+    "\\front\\seu\\src"
   ],
-  "SelectedNode": "\\back\\src\\SisEUs.API",
+  "SelectedNode": "\\front\\seu\\src",
   "PreviewInSolutionExplorer": false
 }

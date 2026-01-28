@@ -46,7 +46,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Bookmark",
@@ -54,11 +54,15 @@
             },
             {
               "$type": "Bookmark",
-              "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
             },
             {
               "$type": "Bookmark",
-              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+              "Name": "ST:0:0:{40ea2e6b-2121-4bb8-a43e-c83c04b51041}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:505648215:0:{83107a3e-496a-485e-b455-16ddb978e55e}"
             },
             {
               "$type": "Document",
@@ -68,7 +72,7 @@
               "RelativeDocumentMoniker": "back\\src\\SisEUs.API\\SisEUs.API.csproj",
               "ToolTip": "C:\\Users\\gabri\\source\\repos\\SisEU\\back\\src\\SisEUs.API\\SisEUs.API.csproj",
               "RelativeToolTip": "back\\src\\SisEUs.API\\SisEUs.API.csproj",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAA4AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
               "WhenOpened": "2026-01-23T17:48:21.345Z",
               "EditorCaption": ""
@@ -83,8 +87,7 @@
               "RelativeToolTip": "back\\src\\SisEUs.API\\Token\\HttpContextTokenValue.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-23T17:47:09.085Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-01-23T17:47:09.085Z"
             },
             {
               "$type": "Document",
@@ -96,8 +99,7 @@
               "RelativeToolTip": "back\\src\\SisEUs.API\\Filter\\AuthenticatedUserFilter.cs",
               "ViewState": "AgIAAB4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-23T17:46:08.062Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-01-23T17:46:08.062Z"
             },
             {
               "$type": "Document",
@@ -109,8 +111,7 @@
               "RelativeToolTip": "back\\src\\SisEUs.API\\Controllers\\AuthenticacoesController.cs",
               "ViewState": "AgIAAA8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-23T17:44:52.898Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-01-23T17:44:52.898Z"
             },
             {
               "$type": "Document",
@@ -122,8 +123,7 @@
               "RelativeToolTip": "back\\src\\SisEUs.API\\Controllers\\BaseController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-23T17:44:51.466Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-01-23T17:44:51.466Z"
             },
             {
               "$type": "Document",
@@ -135,8 +135,7 @@
               "RelativeToolTip": "back\\src\\SisEUs.API\\Controllers\\PresencasController.cs",
               "ViewState": "AgIAAGwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-23T17:44:42.457Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-01-23T17:44:42.457Z"
             },
             {
               "$type": "Document",
@@ -148,8 +147,7 @@
               "RelativeToolTip": "back\\src\\SisEUs.API\\Controllers\\EventosController.cs",
               "ViewState": "AgIAACoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-23T17:44:35.384Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-01-23T17:44:35.384Z"
             },
             {
               "$type": "Document",
@@ -161,8 +159,7 @@
               "RelativeToolTip": "back\\src\\SisEUs.API\\Controllers\\CheckinController.cs",
               "ViewState": "AgIAAFoAAAAAAAAAAAAAAEIAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-23T17:43:40.748Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-01-23T17:43:40.748Z"
             },
             {
               "$type": "Document",
@@ -174,12 +171,11 @@
               "RelativeToolTip": "back\\src\\SisEUs.Apresentation\\Authenticacoes\\DTOs\\Resposta\\LoginResposta.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-23T17:43:10.411Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-01-23T17:43:10.411Z"
             },
             {
               "$type": "Bookmark",
-              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
             }
           ]
         }
