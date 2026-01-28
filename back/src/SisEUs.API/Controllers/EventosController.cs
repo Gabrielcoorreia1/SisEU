@@ -53,6 +53,14 @@ namespace SisEUs.Api.Controllers
             return HandleResult(resultado);
         }
 
+        [HttpGet("meus-eventos-avaliador")]
+        [ProducesResponseType(typeof(IEnumerable<EventoResposta>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> ObterMeusEventosComoAvaliador(CancellationToken cancellationToken)
+        {
+            var resultado = await servico.ObterEventosPorAvaliadorAsync(cancellationToken);
+            return HandleResult(resultado);
+        }
+
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -99,7 +107,7 @@ namespace SisEUs.Api.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> AdicionarAvaliador(int eventoId, [FromBody] int avaliadorCpf, CancellationToken cancellationToken)
+        public async Task<IActionResult> AdicionarAvaliador(int eventoId, [FromBody] string avaliadorCpf, CancellationToken cancellationToken)
         {
             var resultado = await servico.AdicionarAvaliadorAsync(avaliadorCpf, eventoId, cancellationToken);
             return HandleResult(resultado);
@@ -109,7 +117,7 @@ namespace SisEUs.Api.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> RemoverAvaliador(int eventoId, int avaliadorCpf, CancellationToken cancellationToken)
+        public async Task<IActionResult> RemoverAvaliador(int eventoId, [FromQuery] string avaliadorCpf, CancellationToken cancellationToken)
         {
             var resultado = await servico.RemoverAvaliadorAsync(avaliadorCpf, eventoId, cancellationToken);
             return HandleResult(resultado);

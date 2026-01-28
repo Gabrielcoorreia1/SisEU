@@ -5,9 +5,12 @@ using SisEUs.Application.Comum.Mapeamento;
 using SisEUs.Application.Comum.Resultados;
 using SisEUs.Application.Comum.UoW;
 using SisEUs.Domain.Comum.Excecoes;
+using SisEUs.Domain.Comum.LoggedUser;
 using SisEUs.Domain.ContextoDeEvento.Entidades;
 using SisEUs.Domain.ContextoDeEvento.Interfaces;
 using SisEUs.Domain.ContextoDeEvento.ObjetosDeValor;
+using SisEUs.Domain.ContextoDeUsuario.Interfaces;
+using SisEUs.Domain.ContextoDeUsuario.ObjetosDeValor;
 using Microsoft.Extensions.Logging;
 
 namespace SisEUs.Application.Apresentacoes
@@ -15,9 +18,11 @@ namespace SisEUs.Application.Apresentacoes
     public class ApresentacaoServico(
         IEventoRepositorio eventoRepositorio,
         IApresentacaoRepositorio apresentacaoRepositorio,
+        IUsuarioRepositorio usuarioRepositorio,
         ILogger<ApresentacaoServico> logger,
         IUoW uow,
-        IMapeadorDeEntidades mapeador) : IApresentacaoServico
+        IMapeadorDeEntidades mapeador,
+        ILoggedUser loggedUser) : IApresentacaoServico
     {
         public async Task<Resultado<ApresentacaoResposta>> CriarApresentacaoAsync(CriarApresentacaoSolicitacao request, CancellationToken cancellationToken)
         {
@@ -45,13 +50,31 @@ namespace SisEUs.Application.Apresentacoes
         {
             try
             {
+                // Buscar autor por CPF
+                var cpfAutor = Cpf.Criar(request.CpfAutor);
+                var autor = await usuarioRepositorio.ObterPorCpfAsync(cpfAutor, cancellationToken);
+                if (autor is null)
+                {
+                    logger.LogWarning("Autor com CPF {CpfAutor} não encontrado", request.CpfAutor);
+                    return Resultado<Apresentacao>.Falha(TipoDeErro.NaoEncontrado, $"Autor com CPF '{request.CpfAutor}' não encontrado.");
+                }
+
+                // Buscar orientador por CPF
+                var cpfOrientador = Cpf.Criar(request.CpfOrientador);
+                var orientador = await usuarioRepositorio.ObterPorCpfAsync(cpfOrientador, cancellationToken);
+                if (orientador is null)
+                {
+                    logger.LogWarning("Orientador com CPF {CpfOrientador} não encontrado", request.CpfOrientador);
+                    return Resultado<Apresentacao>.Falha(TipoDeErro.NaoEncontrado, $"Orientador com CPF '{request.CpfOrientador}' não encontrado.");
+                }
+
                 var titulo = Titulo.Criar(request.Titulo);
 
                 var novaApresentacao = Apresentacao.Criar(
                     request.EventoId,
                     titulo,
-                    request.NomeAutor,
-                    request.NomeOrientador,
+                    autor.Id,
+                    orientador.Id,
                     request.Modalidade
                 );
 
@@ -171,8 +194,26 @@ namespace SisEUs.Application.Apresentacoes
                     return Resultado.Falha(TipoDeErro.NaoEncontrado, "Apresentação não encontrada.");
                 }
 
+                // Buscar autor por CPF
+                var cpfAutor = Cpf.Criar(request.CpfAutor);
+                var autor = await usuarioRepositorio.ObterPorCpfAsync(cpfAutor, cancellationToken);
+                if (autor is null)
+                {
+                    logger.LogWarning("Autor com CPF {CpfAutor} não encontrado", request.CpfAutor);
+                    return Resultado.Falha(TipoDeErro.NaoEncontrado, $"Autor com CPF '{request.CpfAutor}' não encontrado.");
+                }
+
+                // Buscar orientador por CPF
+                var cpfOrientador = Cpf.Criar(request.CpfOrientador);
+                var orientador = await usuarioRepositorio.ObterPorCpfAsync(cpfOrientador, cancellationToken);
+                if (orientador is null)
+                {
+                    logger.LogWarning("Orientador com CPF {CpfOrientador} não encontrado", request.CpfOrientador);
+                    return Resultado.Falha(TipoDeErro.NaoEncontrado, $"Orientador com CPF '{request.CpfOrientador}' não encontrado.");
+                }
+
                 var titulo = Titulo.Criar(request.Titulo);
-                apresentacao.Atualizar(titulo, request.NomeAutor, request.NomeOrientador);
+                apresentacao.Atualizar(titulo, autor.Id, orientador.Id);
 
                 await uow.CommitAsync(cancellationToken);
                 
@@ -187,6 +228,39 @@ namespace SisEUs.Application.Apresentacoes
             catch (Exception ex)
             {
                 logger.LogError(ex, "Erro inesperado ao atualizar apresentação {ApresentacaoId}", apresentacaoId);
+                throw;
+            }
+        }
+
+        public async Task<Resultado<IEnumerable<ApresentacaoResposta>>> ObterApresentacoesPorAutorAsync(CancellationToken cancellationToken)
+        {
+            logger.LogInformation("Obtendo apresentações do autor logado");
+
+            try
+            {
+                var usuarioLogado = await loggedUser.User();
+
+                var apresentacoes = await apresentacaoRepositorio.ObterPorAutorIdAsync(usuarioLogado.Id, cancellationToken);
+
+                if (!apresentacoes.Any())
+                {
+                    logger.LogInformation("Nenhuma apresentação encontrada para o autor {AutorId}", usuarioLogado.Id);
+                    return Resultado<IEnumerable<ApresentacaoResposta>>.Ok(Enumerable.Empty<ApresentacaoResposta>());
+                }
+
+                var dtos = new List<ApresentacaoResposta>();
+                foreach (var apresentacao in apresentacoes)
+                {
+                    var dto = await mapeador.MapearApresentacaoAsync(apresentacao, cancellationToken);
+                    dtos.Add(dto);
+                }
+
+                logger.LogInformation("Encontradas {Count} apresentações para o autor {AutorId}", dtos.Count, usuarioLogado.Id);
+                return Resultado<IEnumerable<ApresentacaoResposta>>.Ok(dtos);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Erro ao obter apresentações do autor logado");
                 throw;
             }
         }

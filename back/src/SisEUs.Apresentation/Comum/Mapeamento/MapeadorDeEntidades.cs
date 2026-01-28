@@ -154,12 +154,34 @@ namespace SisEUs.Application.Comum.Mapeamento
                 ? await MapearEventoAsync(evento, cancellationToken)
                 : null!;
 
+            // Buscar autor e orientador
+            var autor = await _usuarioRepositorio.ObterPorIdAsync(apresentacao.AutorId, cancellationToken);
+            var orientador = await _usuarioRepositorio.ObterPorIdAsync(apresentacao.OrientadorId, cancellationToken);
+
+            var autorDto = autor != null 
+                ? MapearUsuario(autor)
+                : new UsuarioResposta(
+                    Id: 0,
+                    NomeCompleto: "Autor não encontrado",
+                    Cpf: "Sem cpf",
+                    Email: "Sem email"
+                );
+
+            var orientadorDto = orientador != null 
+                ? MapearUsuario(orientador)
+                : new UsuarioResposta(
+                    Id: 0,
+                    NomeCompleto: "Orientador não encontrado",
+                    Cpf: "Sem cpf",
+                    Email: "Sem email"
+                );
+
             return new ApresentacaoResposta(
                 apresentacao.Id,
                 eventoDto,
                 apresentacao.Titulo.Valor,
-                apresentacao.NomeAutor,
-                apresentacao.NomeOrientador
+                autorDto,
+                orientadorDto
             );
         }
 

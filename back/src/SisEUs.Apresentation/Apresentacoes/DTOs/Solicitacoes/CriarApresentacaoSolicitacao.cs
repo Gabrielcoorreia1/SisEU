@@ -7,8 +7,8 @@ namespace SisEUs.Application.Apresentacoes.DTOs.Solicitacoes
         long? Id,
         int EventoId,
         string Titulo,
-        string NomeAutor,
-        string NomeOrientador,
+        string CpfAutor,
+        string CpfOrientador,
         EModalidadeApresentacao Modalidade
     );
 }
