@@ -17,4 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SisEUs.Domain\SisEUs.Domain.csproj" />
-    <ProjectReference Include="..\SisEUs.Apresenta
+    <ProjectReference Include="..\SisEUs.Apresentation\SisEUs.Application.csproj" />
+  </ItemGroup>
+
+</Project>
